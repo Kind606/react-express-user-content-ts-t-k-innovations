@@ -1,0 +1,6 @@
+# Klientprojektet
+
+TA BORT DEN HÄR FILEN OCH INITIERA KODBASEN MED VITE, NI VÄLJER RAMVERK: REACT, VUE, SOLID, SVELTE.
+
+TÄNK PÅ ATT KONFIGURERA VITE'S PROXY SÅ ATT KLIENTEN KAN KOMMA ÅT API'ET.
+https://vite.dev/config/server-options#server-proxy
