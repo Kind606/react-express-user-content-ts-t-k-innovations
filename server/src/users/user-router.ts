@@ -6,10 +6,12 @@ const getAllUsers = async (req: Request, res: Response) => {
   res.status(200).json(users);
 };
 
-const createCat = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response) => {
   const user = await UserModel.create(req.body);
   res.status(201).json(user);
 };
+
+
 
 export const userRouter = Router()
   
