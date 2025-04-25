@@ -11,5 +11,5 @@ const createCat = async (req: Request, res: Response) => {
   res.status(201).json(user);
 };
 
-export const UserRouter = Router()
+export const userRouter = Router()
   
