@@ -16,7 +16,7 @@ app.use(
     name: "session",
     keys: [process.env.COOKIE_SECRET ?? "default_secret"], 
     maxAge: 24 * 60 * 60 * 1000, 
-);
+}));
 app.use(postRouter);
 app.use(userRouter);
 app.use(errorHandler);
