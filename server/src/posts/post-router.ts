@@ -20,9 +20,7 @@ const getPostById = async (req: Request, res: Response) => {
     );
 
     if (!post) {
-      return res
-        .status(404)
-        .json({ error: `Post with id ${req.params.id} not found` });
+      return res.status(404).json(`Post with id ${req.params.id} not found`);
     }
     res.status(200).json(post);
   } catch (error) {
@@ -61,12 +59,34 @@ const updatePost = async (req: Request, res: Response) => {
   try {
     const { title, content, image } = req.body;
 
-    if (!title || typeof title !== "string") {
-      return res.status(400).json("Invalid title");
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json("No update data provided");
     }
 
-    if (!content || typeof content !== "string") {
-      return res.status(400).json("Invalid content");
+    if (title !== undefined) {
+      if (typeof title !== "string") {
+        return res.status(400).json("Invalid title");
+      }
+      if (title.trim() === "") {
+        return res.status(400).json("Title cannot be empty");
+      }
+    }
+
+    if (content !== undefined) {
+      if (typeof content !== "string") {
+        return res.status(400).json("Invalid content");
+      }
+      if (content.trim() === "") {
+        return res.status(400).json("Content cannot be empty");
+      }
+    }
+
+    if (title === undefined) {
+      return res.status(400).json("Missing title");
+    }
+
+    if (content === undefined) {
+      return res.status(400).json("Missing content");
     }
 
     const updatedPost = await PostModel.findByIdAndUpdate(
@@ -76,9 +96,7 @@ const updatePost = async (req: Request, res: Response) => {
     );
 
     if (!updatedPost) {
-      return res
-        .status(404)
-        .json({ error: `Post with id ${req.params.id} not found` });
+      return res.status(404).json(`Post with id ${req.params.id} not found`);
     }
 
     res.status(200).json(updatedPost);
@@ -92,12 +110,10 @@ const deletePost = async (req: Request, res: Response) => {
     const deletedPost = await PostModel.findByIdAndDelete(req.params.id);
 
     if (!deletedPost) {
-      return res
-        .status(404)
-        .json({ error: `Post with id ${req.params.id} not found` });
+      return res.status(404).json(`Post with id ${req.params.id} not found`);
     }
 
-    res.status(200).json({ message: "Post deleted", post: deletedPost });
+    res.status(204).end();
   } catch (error) {
     res.status(500).json("Error deleting post");
   }
