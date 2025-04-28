@@ -12,6 +12,7 @@ const getAllPosts = async (req: Request, res: Response) => {
   }
 };
 
+
 const getPostById = async (req: Request, res: Response) => {
   try {
     const post = await PostModel.findById(req.params.id).populate(
@@ -132,3 +133,4 @@ postRouter.get("/:id", getPostById);
 postRouter.post("/", isAuthenticated, createPost);
 postRouter.put("/:id", isOwnerOrAdmin, updatePost);
 postRouter.delete("/:id", isOwnerOrAdmin, deletePost);
+
