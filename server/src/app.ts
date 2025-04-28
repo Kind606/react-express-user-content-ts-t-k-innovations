@@ -1,6 +1,6 @@
 import cookieSession from "cookie-session";
 import express from "express";
-import { errorHandler } from "./middlewares";
+import { errorHandler } from "./middlewares/index";
 import { postRouter } from "./posts/post-router";
 import userRouter from "./users/user-router";
 
@@ -14,9 +14,12 @@ app.use(express.json());
 app.use(
   cookieSession({
     name: "session",
-    keys: [process.env.COOKIE_SECRET ?? "default_secret"], 
-    maxAge: 24 * 60 * 60 * 1000, 
-}));
-app.use("/api/posts", postRouter);  
+    keys: [process.env.COOKIE_SECRET ?? "default_secret"],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
+
+app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);
+
 app.use(errorHandler);

@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
-import { isAuthenticated, isOwnerOrAmin } from "../middlewares";
+import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
 import { PostModel } from "./post-model";
+import { Types } from "mongoose";
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
@@ -45,6 +46,7 @@ const createPost = async (req: Request, res: Response) => {
       title,
       content,
       author: new Types.ObjectId(req.session!.id),
+      image: req.body.image,
     });
 
     await post.save();
@@ -57,7 +59,7 @@ const createPost = async (req: Request, res: Response) => {
 
 const updatePost = async (req: Request, res: Response) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, image } = req.body;
 
     if (!title || typeof title !== "string") {
       return res.status(400).json("Invalid title");
@@ -69,7 +71,7 @@ const updatePost = async (req: Request, res: Response) => {
 
     const updatedPost = await PostModel.findByIdAndUpdate(
       req.params.id,
-      { title, content },
+      { title, content, image },
       { new: true, runValidators: true }
     );
 
@@ -107,5 +109,5 @@ postRouter.get("/", getAllPosts);
 postRouter.get("/:id", getPostById);
 
 postRouter.post("/", isAuthenticated, createPost);
-postRouter.put("/:id", isOwnerOrAmin, updatePost);
-postRouter.delete("/:id", isOwnerOrAmin, deletePost);
+postRouter.put("/:id", isOwnerOrAdmin, updatePost);
+postRouter.delete("/:id", isOwnerOrAdmin, deletePost);
