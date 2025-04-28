@@ -1,6 +1,6 @@
 import cookieSession from "cookie-session";
 import express from "express";
-import { errorHandler } from "./middlewares/index";
+import { errorHandler } from "./middlewares";
 import { postRouter } from "./posts/post-router";
 import userRouter from "./users/user-router";
 
