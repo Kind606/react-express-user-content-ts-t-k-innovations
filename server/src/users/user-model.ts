@@ -1,20 +1,23 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import argon2, { hash } from "argon2";
 
 const userSchema = new Schema({
-    username: { type: String, required: true },
-    password: { type: String, required: true },
-    isAdmin: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now() },
-  });
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  isAdmin: { type: Boolean, default: false },
 
-  userSchema.pre("save", function (next) {
-    if (this.isModified("password")) {
-      // Hash the password here using bcrypt or any other hashing library
-      // this.password = hashPassword(this.password);
-    }
+});
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    this.password = await argon2.hash(this.password);
     next();
-  });
+  } catch (err) {
+    next(err as Error);
+  }
+});
 
 export const UserModel = model("User", userSchema);
-
 export type User = InferSchemaType<typeof userSchema>;
