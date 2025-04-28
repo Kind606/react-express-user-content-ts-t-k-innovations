@@ -57,41 +57,46 @@ const createPost = async (req: Request, res: Response) => {
 
 const updatePost = async (req: Request, res: Response) => {
   try {
-    const { title, content, image } = req.body;
-
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json("No update data provided");
     }
 
-    if (title !== undefined) {
-      if (typeof title !== "string") {
-        return res.status(400).json("Invalid title");
-      }
-      if (title.trim() === "") {
-        return res.status(400).json("Title cannot be empty");
-      }
-    }
-
-    if (content !== undefined) {
-      if (typeof content !== "string") {
-        return res.status(400).json("Invalid content");
-      }
-      if (content.trim() === "") {
-        return res.status(400).json("Content cannot be empty");
-      }
-    }
+    const { title, content, image, author } = req.body;
 
     if (title === undefined) {
       return res.status(400).json("Missing title");
+    }
+    if (typeof title !== "string") {
+      return res.status(400).json("Invalid title");
+    }
+    if (title.trim() === "") {
+      return res.status(400).json("Title cannot be empty");
     }
 
     if (content === undefined) {
       return res.status(400).json("Missing content");
     }
+    if (typeof content !== "string") {
+      return res.status(400).json("Invalid content");
+    }
+    if (content.trim() === "") {
+      return res.status(400).json("Content cannot be empty");
+    }
+
+    if (author === undefined) {
+      return res.status(400).json("Missing author");
+    }
+    if (typeof author === "string") {
+      if (!Types.ObjectId.isValid(author)) {
+        return res.status(400).json("Invalid author");
+      }
+    } else if (!(author instanceof Types.ObjectId)) {
+      return res.status(400).json("Invalid author");
+    }
 
     const updatedPost = await PostModel.findByIdAndUpdate(
       req.params.id,
-      { title, content, image },
+      { title, content, image, author },
       { new: true, runValidators: true }
     );
 
