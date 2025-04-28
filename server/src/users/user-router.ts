@@ -11,10 +11,11 @@ userRouter.post("/register", async (req: Request, res: Response) => {
 
   const existingUser = await UserModel.findOne({ username });
   if (existingUser) {
-    return res.status(400).json("Username already taken" );
+    return res.status(400).json("Username already taken");
   }
 
-  const user = new UserModel({ username, password });
+  const hashedPassword = await argon2.hash(password);
+  const user = new UserModel({ username, password: hashedPassword });
   await user.save();
 
   req.session = {
@@ -24,10 +25,12 @@ userRouter.post("/register", async (req: Request, res: Response) => {
   };
 
   res.status(201).json({
-    message: "User registered",
-    user: { username: user.username, isAdmin: user.isAdmin },
+    _id: user._id,
+    username: user.username,
+    isAdmin: user.isAdmin,
   });
 });
+
 
 // Login
 userRouter.post("/login", async (req, res) => {
