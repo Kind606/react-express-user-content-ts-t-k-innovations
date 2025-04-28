@@ -1,6 +1,4 @@
 
-GET http://localhost:3000/api/posts
-
 ### Register a new user
 POST http://localhost:3000/api/users/register
 Content-Type: application/json
@@ -17,4 +15,52 @@ Content-Type: application/json
 {
   "username": "testuser@example.com",
   "password": "password123"
+}
+
+### POSTS
+
+// ...existing code...
+
+### Get all posts
+GET http://localhost:3000/api/posts
+
+### Get a specific post (replace with actual ID after creating one)
+GET http://localhost:3000/api/posts/postIdHere
+
+### Create a new post (requires login)
+POST http://localhost:3000/api/posts
+Content-Type: application/json
+
+{
+  "title": "My Test Post",
+  "content": "This is some test content for my post."
+}
+
+### Update a post (requires login and ownership)
+PUT http://localhost:3000/api/posts/postIdHere
+Content-Type: application/json
+
+{
+  "title": "Updated Post Title",
+  "content": "This content has been updated."
+}
+
+### Delete a post (requires login and ownership)
+DELETE http://localhost:3000/api/posts/postIdHere
+
+### Create a post with invalid data (should return 400)
+POST http://localhost:3000/api/posts
+Content-Type: application/json
+
+{
+  "title": {}
+}
+
+### Try to create a post without login (should return 401)
+POST http://localhost:3000/api/posts
+Content-Type: application/json
+
+{
+  "title": "Unauthorized Post",
+  "content": "This should fail without login"
 }
