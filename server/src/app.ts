@@ -17,6 +17,6 @@ app.use(
     keys: [process.env.COOKIE_SECRET ?? "default_secret"], 
     maxAge: 24 * 60 * 60 * 1000, 
 }));
-app.use(postRouter);
-app.use(userRouter);
+app.use("/api/posts", postRouter);  
+app.use("/api/users", userRouter);
 app.use(errorHandler);

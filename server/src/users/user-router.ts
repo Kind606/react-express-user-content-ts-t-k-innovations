@@ -10,8 +10,9 @@ userRouter.post("/register", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const existingUser = await UserModel.findOne({ username });
-  if (existingUser)
+  if (existingUser) {
     return res.status(400).json("Username already taken" );
+  }
 
   const user = new UserModel({ username, password });
   await user.save();
@@ -52,5 +53,11 @@ userRouter.post("/login", async (req, res) => {
     isAdmin: user.isAdmin,
   });
 });
+
+userRouter.get("/logout", (req, res) => {
+  req.session = null;
+  res.status(200).json({ message: "Logged out" });
+}
+);
 
 export default userRouter;
