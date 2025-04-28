@@ -6,7 +6,5 @@ const getAllPosts = async (req: Request, res: Response) => {
   res.status(200).json(posts);
 };
 
-
-
 export const postRouter = Router()
 .get("/api/posts", getAllPosts)

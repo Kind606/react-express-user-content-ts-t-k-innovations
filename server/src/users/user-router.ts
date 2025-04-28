@@ -9,26 +9,36 @@ const userRouter = express.Router();
 userRouter.post("/register", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const existingUser = await UserModel.findOne({ username });
-  if (existingUser) {
-    return res.status(400).json("Username already taken");
+  if (!username || !password) {
+    return res.status(400).json("Username and password are required");
   }
 
-  const hashedPassword = await argon2.hash(password);
-  const user = new UserModel({ username, password: hashedPassword });
-  await user.save();
+  const existingUser = await UserModel.findOne({ username });
+  if (existingUser) {
+    return res.status(409).json("Username already taken"); 
+  }
 
-  req.session = {
-    id: user._id.toString(),
-    username: user.username,
-    isAdmin: user.isAdmin,
-  };
+  const user = new UserModel({ username, password });
 
-  res.status(201).json({
-    _id: user._id,
-    username: user.username,
-    isAdmin: user.isAdmin,
-  });
+  try {
+
+    await user.save();
+
+    req.session = {
+      id: user._id.toString(),
+      username: user.username,
+      isAdmin: user.isAdmin,
+    };
+
+    res.status(201).json({
+      _id: user._id,
+      username: user.username,
+      isAdmin: user.isAdmin,
+    });
+  } catch (err) {
+
+    res.status(500).json("Internal server error");
+  }
 });
 
 
