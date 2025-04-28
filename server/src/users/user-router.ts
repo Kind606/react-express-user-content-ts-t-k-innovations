@@ -34,12 +34,16 @@ userRouter.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   const user = await UserModel.findOne({ username });
-  if (!user)
-    return res.status(401).json({ error: "Invalid username or password" });
+  
+  if (!user) {
+    return res.status(401).json("Invalid username or password");
+  }
 
   const valid = await argon2.verify(user.password, password);
-  if (!valid)
-    return res.status(401).json({ error: "Invalid username or password" });
+
+  if (!valid) {
+    return res.status(401).json("Invalid username or password");
+  }
 
   req.session = {
     id: user._id.toString(),
@@ -54,10 +58,10 @@ userRouter.post("/login", async (req, res) => {
   });
 });
 
-userRouter.get("/logout", (req, res) => {
+
+userRouter.post("/logout", (req, res) => {
   req.session = null;
-  res.status(200).json({ message: "Logged out" });
-}
-);
+  res.sendStatus(204); 
+});
 
 export default userRouter;
