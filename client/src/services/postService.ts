@@ -3,7 +3,7 @@ import { Post } from "../types/Post";
 
 // Authentication functions (this should be in authService.ts, but keeping for reference)
 export const login = (username: string, password: string) =>
-  api.post("/auth/login", { username, password });
+  api.post("/users/login", { username, password });
 
 // Post-related API functions
 export const getAllPosts = async (): Promise<Post[]> => {
