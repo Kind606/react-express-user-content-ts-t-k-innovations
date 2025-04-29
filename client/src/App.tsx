@@ -7,7 +7,6 @@ import PostsPage from "./pages/PostsPage";
 // import AdminPage from "./pages/AdminPage";
 import ErrorPage from "./pages/ErrorPage";
 
-import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
