@@ -1,17 +1,15 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import HomePage from "./pages/HomePage";
-// import LoginPage from "./pages/LoginPage";
-// import RegisterPage from "./pages/RegisterPage";
-// import PostsPage from "./pages/PostsPage";
+
 // import PostDetailPage from "./pages/PostDetailPage";
 // import CreatePostPage from "./pages/CreatePostPage";
 // import ProfilePage from "./pages/ProfilePage";
 // import AdminPage from "./pages/AdminPage";
 import ErrorPage from "./pages/ErrorPage";
 
-import "./App.css";
-
+import LoginPage from "./pages/LoginPage";
+import PostPage from "./pages/PostPage";
+import RegisterPage from "./pages/RegisterPage";
 
 const router = createBrowserRouter([
   {
@@ -19,9 +17,9 @@ const router = createBrowserRouter([
     element: <Layout />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <HomePage /> },
-      // { path: "login", element: <LoginPage /> },
-      // { path: "register", element: <RegisterPage /> },
+      { index: true, element: <PostPage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
       // { path: "posts", element: <PostsPage /> },
       // { path: "posts/:id", element: <PostDetailPage /> },
       // { path: "create-post", element: <CreatePostPage /> },
