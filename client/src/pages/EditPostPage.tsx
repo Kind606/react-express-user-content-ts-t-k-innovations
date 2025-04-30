@@ -40,7 +40,9 @@ const EditPostPage = () => {
 
   useEffect(() => {
     if (post && user) {
-      const isAuthor = post.author._id === user._id;
+      const authorId =
+        typeof post.author === "string" ? post.author : post.author._id;
+      const isAuthor = authorId === user._id;
       const isAdmin = user.isAdmin;
 
       if (!isAuthor && !isAdmin) {
