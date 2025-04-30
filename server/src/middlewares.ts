@@ -69,3 +69,10 @@ export const isOwnerOrAdmin = async (
     next(error);
   }
 };
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session || !req.session.isAdmin) {
+    return res.status(403).json("Admin privileges required");
+  }
+  next();
+};
