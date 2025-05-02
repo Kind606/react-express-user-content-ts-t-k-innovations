@@ -8,8 +8,6 @@ require("express-async-errors");
 
 export const app = express();
 
-// SKRIV DIN SERVERKOD HÄR!¨
-
 app.use(express.json());
 app.use(
   cookieSession({

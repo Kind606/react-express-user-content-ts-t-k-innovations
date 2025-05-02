@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import { Request, Response } from "express";
 import { UserModel } from "./user-model";
 import express from "express";
+import { isAuthenticated, isAdmin } from "../middlewares";
 
 const userRouter = express.Router();
 
@@ -15,13 +16,12 @@ userRouter.post("/register", async (req: Request, res: Response) => {
 
   const existingUser = await UserModel.findOne({ username });
   if (existingUser) {
-    return res.status(409).json("Username already taken"); 
+    return res.status(409).json("Username already taken");
   }
 
   const user = new UserModel({ username, password });
 
   try {
-
     await user.save();
 
     req.session = {
@@ -36,18 +36,16 @@ userRouter.post("/register", async (req: Request, res: Response) => {
       isAdmin: user.isAdmin,
     });
   } catch (err) {
-
     res.status(500).json("Internal server error");
   }
 });
-
 
 // Login
 userRouter.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   const user = await UserModel.findOne({ username });
-  
+
   if (!user) {
     return res.status(401).json("Invalid username or password");
   }
@@ -71,10 +69,83 @@ userRouter.post("/login", async (req, res) => {
   });
 });
 
-
+// Logout
 userRouter.post("/logout", (req, res) => {
   req.session = null;
-  res.sendStatus(204); 
+  res.sendStatus(204);
 });
+
+// ADMIN ROUTES
+
+// Get all users (admin only)
+userRouter.get(
+  "/",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const users = await UserModel.find({}, { password: 0 }); // Exclude password field
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json("Error fetching users");
+    }
+  }
+);
+
+// Update user (admin only)
+userRouter.put(
+  "/:id",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const { username, isAdmin } = req.body;
+
+      const updateData: { username?: string; isAdmin?: boolean } = {};
+
+      if (username !== undefined) {
+        updateData.username = username;
+      }
+
+      if (isAdmin !== undefined) {
+        updateData.isAdmin = isAdmin;
+      }
+
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true, select: "-password" } // Return updated document without password
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json(`User with id ${req.params.id} not found`);
+      }
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).json("Error updating user");
+    }
+  }
+);
+
+// Delete user (admin only)
+userRouter.delete(
+  "/:id",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
+
+      if (!deletedUser) {
+        return res.status(404).json(`User with id ${req.params.id} not found`);
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json("Error deleting user");
+    }
+  }
+);
 
 export default userRouter;
