@@ -1,10 +1,9 @@
 import { AppBar, Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
-  //replace it with actual auth logic later
-  const isLoggedIn = false;
-  const isAdmin = false;
+  const { user, logout } = useAuth();
 
   return (
     <AppBar color="default" position="static">
@@ -16,6 +15,7 @@ const Header = () => {
           padding: 2,
         }}
       >
+        {/* Logo */}
         <Box
           sx={{
             display: "flex",
@@ -24,42 +24,49 @@ const Header = () => {
             cursor: "pointer",
           }}
         >
-          <Link to="/" style={
-            {
+          <Link
+            to="/"
+            style={{
               textDecoration: "none",
               color: "inherit",
               fontSize: "30px",
-              fontWeight: "bolder"
-            }
-          }>Content Platform</Link>
+              fontWeight: "bolder",
+            }}
+          >
+            Content Platform
+          </Link>
         </Box>
+
+        {/* Navigation Links */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Link to="/">
-            <Button color="inherit">Home</Button>
-          </Link>
-
           <Link to="/posts">
-            <Button color="inherit">Post</Button>
+            <Button color="inherit">Posts</Button>
           </Link>
 
-          {isLoggedIn ? (
+          {user ? (
             <>
               <Link to="/create-post">
                 <Button color="inherit">Create Post</Button>
               </Link>
 
               <Link to="/profile">
-                <Button color="inherit">Profile </Button>
+                <Button color="inherit">Profile</Button>
               </Link>
 
-              {isAdmin && <Link to="/admin">Admin</Link>}
+              {user.isAdmin && (
+                <Link to="/admin">
+                  <Button color="inherit">Admin</Button>
+                </Link>
+              )}
 
-              <button>Logout</button>
+              <Button color="inherit" onClick={logout}>
+                Logout
+              </Button>
             </>
           ) : (
             <>
               <Link to="/login">
-                <Button color="inherit">Login </Button>
+                <Button color="inherit">Login</Button>
               </Link>
 
               <Link to="/register">
