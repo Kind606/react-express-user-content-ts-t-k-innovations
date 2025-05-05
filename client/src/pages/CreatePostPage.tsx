@@ -15,6 +15,7 @@ const CreatePostPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState("");
 
+  // Redirect if not logged in
   if (!user) {
     navigate("/login", {
       state: { message: "You must be logged in to create a post" },
@@ -38,6 +39,7 @@ const CreatePostPage = () => {
     if (file) {
       setImage(file);
 
+      // Create image preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -50,19 +52,21 @@ const CreatePostPage = () => {
     e.preventDefault();
     setError("");
 
+    // Validate input
     if (!title || !content) {
       setError("Please provide both title and content");
       return;
     }
 
+    // Create FormData for image upload
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
-
     if (image) {
       formData.append("image", image);
     }
 
+    // Submit post creation
     createPostMutation.mutate(formData);
   };
 
