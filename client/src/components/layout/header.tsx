@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const Header = () => {
-  //replace it with actual auth logic later
-  const isLoggedIn = false;
-  const isAdmin = false;
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <header className="header">
@@ -19,7 +22,7 @@ const Header = () => {
             <Link to="/posts">Posts</Link>
           </li>
 
-          {isLoggedIn ? (
+          {user ? (
             <>
               <li>
                 <Link to="/create-post">Create Post</Link>
@@ -27,13 +30,15 @@ const Header = () => {
               <li>
                 <Link to="/profile">Profile</Link>
               </li>
-              {isAdmin && (
+              {user.isAdmin && (
                 <li>
                   <Link to="/admin">Admin</Link>
                 </li>
               )}
               <li>
-                <button>Logout</button>
+                <button onClick={handleLogout} className="logout-button">
+                  Logout
+                </button>
               </li>
             </>
           ) : (

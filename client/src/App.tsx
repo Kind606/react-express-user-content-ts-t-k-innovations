@@ -1,12 +1,13 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/layout/Layout";
 import HomePage from "./pages/HomePage";
 import PostsPage from "./pages/PostsPage";
-// import PostDetailPage from "./pages/PostDetailPage";
-// import CreatePostPage from "./pages/CreatePostPage";
-// import AdminPage from "./pages/AdminPage";
+import PostDetailPage from "./pages/PostDetailPage";
+import CreatePostPage from "./pages/CreatePostPage";
+import EditPostPage from "./pages/EditPostPage";
+import AdminPage from "./pages/AdminPage";
 import ErrorPage from "./pages/ErrorPage";
-
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
@@ -20,16 +21,21 @@ const router = createBrowserRouter([
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
       { path: "posts", element: <PostsPage /> },
-      // { path: "posts/:id", element: <PostDetailPage /> },
-      // { path: "create-post", element: <CreatePostPage /> },
-      // { path: "admin", element: <AdminPage /> },
+      { path: "posts/:id", element: <PostDetailPage /> },
+      { path: "posts/:id/edit", element: <EditPostPage /> },
+      { path: "create-post", element: <CreatePostPage /> },
+      { path: "admin", element: <AdminPage /> },
       { path: "*", element: <ErrorPage /> },
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

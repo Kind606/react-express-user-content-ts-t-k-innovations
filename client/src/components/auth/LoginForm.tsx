@@ -1,41 +1,34 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../../services/postService";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+
+  const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    console.log("Attempting to log in with:", { username, password });
+    clearError();
 
     try {
-      const response = await login(username, password);
-
-      console.log("Login response status:", response.status);
-
-      console.log("Login successful:", response.data);
-
+      await login(username, password);
       navigate("/");
     } catch (err) {
+      // Error is handled by the auth context
       console.error("Login error:", err);
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
     }
   };
 
   return (
-    <div>
+    <div className="auth-form">
       <h2>Login</h2>
+
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
           <input
             type="text"
             id="username"
@@ -44,8 +37,9 @@ function LoginForm() {
             required
           />
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
+
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
@@ -54,9 +48,17 @@ function LoginForm() {
             required
           />
         </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Login</button>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <button type="submit" className="submit-button">
+          Login
+        </button>
       </form>
+
+      <p className="auth-link">
+        Don't have an account? <Link to="/register">Register</Link>
+      </p>
     </div>
   );
 }

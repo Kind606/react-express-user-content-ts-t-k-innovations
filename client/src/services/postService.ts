@@ -23,11 +23,9 @@ export const createPost = async (
   return response.data;
 };
 
-export const updatePost = async (
-  id: string,
-  postData: Partial<Post>
-): Promise<Post> => {
-  const response = await api.put(`/posts/${id}`, postData);
+export const updatePost = async (formData: FormData): Promise<Post> => {
+  const id = formData.get("id") as string;
+  const response = await api.put(`/posts/${id}`, formData);
   return response.data;
 };
 
