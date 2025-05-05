@@ -1,5 +1,3 @@
-// (removed initial duplicate router and handlers – keeping only the multer‐enabled implementation below)
-
 import { Request, Response, Router } from "express";
 import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
 import { PostModel } from "./post-model";
@@ -8,13 +6,11 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Ensure upload directory exists
 const uploadDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -26,7 +22,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// Create upload middleware
 const upload = multer({
   storage: storage,
   limits: {
@@ -84,7 +79,6 @@ const createPost = async (req: Request, res: Response) => {
       return res.status(400).json("Invalid content");
     }
 
-    // Use the uploaded file path if available
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     const post = new PostModel({
@@ -104,6 +98,10 @@ const createPost = async (req: Request, res: Response) => {
 
 const updatePost = async (req: Request, res: Response) => {
   try {
+    const isFormData = req.headers["content-type"]?.includes(
+      "multipart/form-data"
+    );
+
     if (Object.keys(req.body).length === 0 && !req.file) {
       return res.status(400).json("No update data provided");
     }
@@ -111,29 +109,62 @@ const updatePost = async (req: Request, res: Response) => {
     const { title, content } = req.body;
     const updateData: any = {};
 
-    if (title !== undefined) {
+    if (isFormData) {
+      if (title !== undefined) {
+        if (typeof title !== "string" || title.trim() === "") {
+          return res.status(400).json("Invalid title");
+        }
+        updateData.title = title;
+      }
+
+      if (content !== undefined) {
+        if (typeof content !== "string" || content.trim() === "") {
+          return res.status(400).json("Invalid content");
+        }
+        updateData.content = content;
+      }
+
+      if (req.file) {
+        updateData.image = `/uploads/${req.file.filename}`;
+      }
+    } else {
+      for (const field of ["title", "content", "author"]) {
+        if (!req.body.hasOwnProperty(field)) {
+          return res.status(400).json(`Missing ${field}`);
+        }
+      }
+
+      if (title === undefined || title === null) {
+        return res.status(400).json("Missing title");
+      }
+
       if (typeof title !== "string") {
         return res.status(400).json("Invalid title");
       }
+
       if (title.trim() === "") {
         return res.status(400).json("Title cannot be empty");
       }
-      updateData.title = title;
-    }
 
-    if (content !== undefined) {
+      if (content === undefined || content === null) {
+        return res.status(400).json("Missing content");
+      }
+
       if (typeof content !== "string") {
         return res.status(400).json("Invalid content");
       }
+
       if (content.trim() === "") {
         return res.status(400).json("Content cannot be empty");
       }
-      updateData.content = content;
-    }
 
-    // Add image if file was uploaded
-    if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      if (req.body.author === undefined || req.body.author === null) {
+        return res.status(400).json("Missing author");
+      }
+
+      updateData.title = title;
+      updateData.content = content;
+      updateData.author = req.body.author;
     }
 
     const updatedPost = await PostModel.findByIdAndUpdate(
@@ -148,7 +179,21 @@ const updatePost = async (req: Request, res: Response) => {
 
     res.status(200).json(updatedPost);
   } catch (error) {
-    res.status(500).json("Error updating post");
+    console.error("Update post error:", error);
+
+    const errorMsg = (error as Error).message.toLowerCase();
+
+    if (errorMsg.includes("title")) {
+      return res.status(400).json("Invalid title");
+    } else if (errorMsg.includes("content")) {
+      return res.status(400).json("Invalid content");
+    } else if (errorMsg.includes("author")) {
+      return res.status(400).json("Invalid author");
+    } else {
+      return res
+        .status(400)
+        .json("Invalid field values for title, content, or author");
+    }
   }
 };
 
