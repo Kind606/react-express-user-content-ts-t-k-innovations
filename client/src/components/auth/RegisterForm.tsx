@@ -1,3 +1,4 @@
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -34,34 +35,49 @@ function RegisterForm() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
-        <button type="submit">Register</button>
-      </form>
-    </div>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: 400,
+        margin: "0 auto",
+        marginTop: 4,
+        padding: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        boxShadow: 3,
+        borderRadius: 2,
+        backgroundColor: "#fff",
+      }}
+    >
+      <Typography variant="h4" component="h1" textAlign="center" gutterBottom>
+        Register
+      </Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      {success && <Alert severity="success">{success}</Alert>}
+      <TextField
+        label="Username"
+        variant="outlined"
+        fullWidth
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        required
+        autoComplete="username"
+      />
+      <TextField
+        label="Password"
+        type="password"
+        variant="outlined"
+        fullWidth
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        Register
+      </Button>
+    </Box>
   );
 }
 

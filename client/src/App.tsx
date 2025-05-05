@@ -1,35 +1,53 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./components/layout/Layout";
-import HomePage from "./pages/HomePage";
-import PostsPage from "./pages/PostsPage";
-// import PostDetailPage from "./pages/PostDetailPage";
-// import CreatePostPage from "./pages/CreatePostPage";
-// import AdminPage from "./pages/AdminPage";
-import ErrorPage from "./pages/ErrorPage";
 
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Layout from "./components/layout/Layout";
+import { AuthProvider } from "./context/AuthContext";
+// import AdminPage from "./pages/AdminPage";
+// import CreatePostPage from "./pages/CreatePostPage";
+// import ErrorPage from "./pages/ErrorPage";
+// import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import PostsPage from "./pages/PostsPage";
 import RegisterPage from "./pages/RegisterPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
-    errorElement: <ErrorPage />,
+    // errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <PostsPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
       { path: "posts", element: <PostsPage /> },
-      // { path: "posts/:id", element: <PostDetailPage /> },
-      // { path: "create-post", element: <CreatePostPage /> },
-      // { path: "admin", element: <AdminPage /> },
-      { path: "*", element: <ErrorPage /> },
+      // {
+      //   path: "create-post",
+      //   element: (
+      //     <ProtectedRoute>
+      //       <CreatePostPage />
+      //     </ProtectedRoute>
+      //   ),
+      // },
+      // {
+      //   path: "admin",
+      //   element: (
+      //     <ProtectedRoute adminOnly>
+      //       <AdminPage />
+      //     </ProtectedRoute>
+      //   ),
+      // },
+      // { path: "*", element: <ErrorPage /> },
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

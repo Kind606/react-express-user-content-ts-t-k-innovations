@@ -37,7 +37,8 @@ Content-Type: application/json
 
 {
   "title": "My Test Post",
-  "content": "This is some test content for my post."
+  "content": "This is some test content for my post.",
+  "image": "https://wallpapers.com/images/featured-full/super-roliga-bilder-iduwjp1gpohrve6r.jpg"
 }
 
 ### Update a post (requires login and ownership)
