@@ -4,9 +4,15 @@ import Header from "./header";
 
 const Layout = () => {
   return (
-    <div className="app-container">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <Header />
-      <main className="main-content">
+      <main style={{ flex: 1 }}>
         <Outlet />
       </main>
       <Footer />

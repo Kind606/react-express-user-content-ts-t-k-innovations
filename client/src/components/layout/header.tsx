@@ -1,3 +1,4 @@
+import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -9,51 +10,66 @@ const Header = () => {
   };
 
   return (
-    <header className="header">
-      <div className="logo">
-        <Link to="/">Content Platform</Link>
-      </div>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/posts">Posts</Link>
-          </li>
+    <AppBar position="static" color="default">
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="h6"
+          component={Link}
+          to="/"
+          sx={{
+            textDecoration: "none",
+            color: "inherit",
+            fontWeight: "bold",
+          }}
+        >
+          Content Platform
+        </Typography>
+
+        
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button component={Link} to="/" color="inherit">
+            Home
+          </Button>
+          <Button component={Link} to="/posts" color="inherit">
+            Posts
+          </Button>
 
           {user ? (
             <>
-              <li>
-                <Link to="/create-post">Create Post</Link>
-              </li>
-              <li>
-                <Link to="/profile">Profile</Link>
-              </li>
+              <Button component={Link} to="/create-post" color="inherit">
+                Create Post
+              </Button>
+              <Button component={Link} to="/profile" color="inherit">
+                Profile
+              </Button>
               {user.isAdmin && (
-                <li>
-                  <Link to="/admin">Admin</Link>
-                </li>
+                <Button component={Link} to="/admin" color="inherit">
+                  Admin
+                </Button>
               )}
-              <li>
-                <button onClick={handleLogout} className="logout-button">
-                  Logout
-                </button>
-              </li>
+              <Button onClick={handleLogout} color="inherit">
+                Logout
+              </Button>
             </>
           ) : (
             <>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
+              <Button component={Link} to="/login" color="inherit">
+                Login
+              </Button>
+              <Button component={Link} to="/register" color="inherit">
+                Register
+              </Button>
             </>
           )}
-        </ul>
-      </nav>
-    </header>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

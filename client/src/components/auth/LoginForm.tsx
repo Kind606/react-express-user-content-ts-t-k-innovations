@@ -1,11 +1,11 @@
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
   const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
 
@@ -22,43 +22,55 @@ function LoginForm() {
   };
 
   return (
-    <div className="auth-form">
-      <h2>Login</h2>
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        {error && <p className="error-message">{error}</p>}
-
-        <button type="submit" className="submit-button">
-          Login
-        </button>
-      </form>
-
-      <p className="auth-link">
-        Don't have an account? <Link to="/register">Register</Link>
-      </p>
-    </div>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: 400,
+        margin: "0 auto",
+        padding: 3,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        boxShadow: 3,
+        borderRadius: 2,
+        backgroundColor: "#fff",
+      }}
+    >
+      <Typography variant="h4" component="h1" textAlign="center" gutterBottom>
+        Login
+      </Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      <TextField
+        label="Username"
+        variant="outlined"
+        fullWidth
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        required
+      />
+      <TextField
+        label="Password"
+        type="password"
+        variant="outlined"
+        fullWidth
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        Login
+      </Button>
+      <Typography variant="body2" textAlign="center" sx={{ marginTop: 2 }}>
+        Don't have an account?{" "}
+        <Link
+          to="/register"
+          style={{ textDecoration: "none", color: "#1976d2" }}
+        >
+          Register
+        </Link>
+      </Typography>
+    </Box>
   );
 }
 
