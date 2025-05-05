@@ -1,3 +1,11 @@
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import { Post } from "../../types/Post";
 
@@ -6,36 +14,60 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post }: PostCardProps) => {
-  const authorname =
+  const authorName =
     typeof post.author === "string" ? post.author : post.author?.username;
 
   return (
-    <div className="post-card">
+    <Card
+      sx={{
+        maxWidth: 345,
+        margin: "16px auto",
+        borderRadius: 2,
+        overflow: "hidden",
+      }}
+    >
       {post.image && (
-        <div className="post-image">
-          <img
-            src={`http://localhost:3000${post.image}`}
-            alt={post.title}
-            className="post-image"
-          />
-        </div>
+        <CardMedia
+          component="img"
+          height="140"
+          image={`http://localhost:3000${post.image}`}
+          alt={post.title}
+        />
       )}
-      <div className="post-content">
-        <h2 className="post-title">
-          <Link to={`/posts/${post._id}`}>{post.title}</Link>
-        </h2>
-        <p className="post-author">By: {authorname}</p>
-        <p className="post-excerpt">
+      <CardContent>
+        <Typography
+          variant="h6"
+          component={Link}
+          to={`/posts/${post._id}`}
+          sx={{
+            textDecoration: "none",
+            color: "inherit",
+            fontWeight: "bold",
+            "&:hover": { color: "primary.main" },
+          }}
+          gutterBottom
+        >
+          {post.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          By: {authorName}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
           {post.content.length > 100
             ? `${post.content.substring(0, 100)}...`
             : post.content}
-        </p>
-        <div className="post-actions">
-          <Link to={`/posts/${post._id}`} className="read-more-btn">
+        </Typography>
+        <Box sx={{ textAlign: "right" }}>
+          <Button
+            component={Link}
+            to={`/posts/${post._id}`}
+            variant="outlined"
+            size="small"
+          >
             Read More
-          </Link>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };

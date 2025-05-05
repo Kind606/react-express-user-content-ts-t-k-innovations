@@ -10,7 +10,7 @@ const Header = () => {
   };
 
   return (
-    <AppBar position="static" color="default">
+    <AppBar position="static" color="primary">
       <Toolbar
         sx={{
           display: "flex",
