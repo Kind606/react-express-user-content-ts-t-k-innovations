@@ -14,6 +14,7 @@ function RegisterForm() {
     setError(null);
     setSuccess(null);
 
+<<<<<<< HEAD
     console.log("Attempting to register with:", { username, password });
 
     try {
@@ -28,6 +29,27 @@ function RegisterForm() {
       setSuccess("Registration successful! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000); // Redirect to login page after 2 seconds
     } catch (err: any) {
+=======
+    if (!username || !password) {
+      setValidationError("Username and password are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setValidationError("Passwords don't match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setValidationError("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      await register(username, password);
+      navigate("/");
+    } catch (err) {
+>>>>>>> newupdaterror
       console.error("Registration error:", err);
       setError(err.response?.data || "An unexpected error occurred");
     }
