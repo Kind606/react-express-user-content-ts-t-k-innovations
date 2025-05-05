@@ -1,4 +1,5 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/jg0mE_96)
+
 # User Based Content
 
 ## Beskrivning
@@ -10,7 +11,7 @@ Ni ska skapa en användarbaserad plattform där en användare har möjligheten a
 Den här kodbasen är indelad i en [klientmapp](./client/) och en [servermapp](./server/).
 Servern har två miljöer konfigurerade, en för utveckling och en för testning.
 
-Servern innehåller några start-filer som kan vara bra att känna till:
+Server-n innehåller några start-filer som kan vara bra att känna till:
 
 - `server.ts` - startfil för utvecklingsmiljön.
 - `app.ts` - innehåller all serverlogik.
