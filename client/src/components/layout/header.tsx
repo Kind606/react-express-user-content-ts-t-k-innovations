@@ -1,3 +1,4 @@
+import { AppBar, Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -9,18 +10,40 @@ const Header = () => {
   };
 
   return (
-    <header className="header">
-      <div className="logo">
-        <Link to="/">Content Platform</Link>
-      </div>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/posts">Posts</Link>
-          </li>
+    <AppBar color="default" position="static">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mr: 2,
+            cursor: "pointer",
+          }}
+        >
+          <Link to="/" style={
+            {
+              textDecoration: "none",
+              color: "inherit",
+              fontSize: "30px",
+              fontWeight: "bolder"
+            }
+          }>Content Platform</Link>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Link to="/">
+            <Button color="inherit">Home</Button>
+          </Link>
+
+          <Link to="/posts">
+            <Button color="inherit">Post</Button>
+          </Link>
 
           {user ? (
             <>
@@ -40,20 +63,32 @@ const Header = () => {
                   Logout
                 </button>
               </li>
+              <Link to="/create-post">
+                <Button color="inherit">Create Post</Button>
+              </Link>
+
+              <Link to="/profile">
+                <Button color="inherit">Profile </Button>
+              </Link>
+
+              {isAdmin && <Link to="/admin">Admin</Link>}
+
+              <button>Logout</button>
             </>
           ) : (
             <>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
+              <Link to="/login">
+                <Button color="inherit">Login </Button>
+              </Link>
+
+              <Link to="/register">
+                <Button color="inherit">Register</Button>
+              </Link>
             </>
           )}
-        </ul>
-      </nav>
-    </header>
+        </Box>
+      </Box>
+    </AppBar>
   );
 };
 

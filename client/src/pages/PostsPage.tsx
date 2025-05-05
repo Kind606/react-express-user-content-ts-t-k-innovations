@@ -1,7 +1,7 @@
+import { Button, Grid, Link, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { getAllPosts } from "../services/postService";
 import { PostCard } from "../components/posts/PostCard";
+import { getAllPosts } from "../services/postService";
 import { Post } from "../types/Post";
 
 const PostsPage = () => {
@@ -16,36 +16,39 @@ const PostsPage = () => {
   });
 
   if (isLoading) {
-    return <div className="loading">Loading posts...</div>;
+    return <Typography>Loading posts...</Typography>;
   }
 
   if (isError) {
     return (
-      <div className="error-message">
+      <Typography color="error">
         Error: {error?.message || "Failed to load posts"}
-      </div>
+      </Typography>
     );
   }
 
   return (
-    <div className="posts-page">
-      <div className="page-header">
-        <h1>Posts</h1>
-        <Link to="/create-post" className="create-post-button">
-          Create New Post
-        </Link>
-      </div>
-      {posts && posts.length > 0 ? (
-        <div className="posts-grid">
-          {posts.map((post: Post) => (
-            <PostCard key={post._id} post={post} />
-          ))}
-        </div>
-      ) : (
-        <div className="no-posts">
-          <p>No posts available</p>
-        </div>
-      )}
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Posts
+      </Typography>
+      <Button>
+          <Link to="/create-post" className="create-post-button">
+            Create New Post
+          </Link>
+        </Button>
+      <Grid container spacing={2}>
+        {posts && posts.length > 0 ? (
+          posts.map((post) => (
+            <Grid item xs={12} sm={6} md={4} key={post._id}>
+              <PostCard post={post} />
+            </Grid>
+          ))
+        ) : (
+          <Typography>No posts available</Typography>
+        )}
+        
+      </Grid>
     </div>
   );
 };
