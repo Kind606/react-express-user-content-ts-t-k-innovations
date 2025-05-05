@@ -18,7 +18,6 @@ app.use(
   })
 );
 
-// Add this line to serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/posts", postRouter);

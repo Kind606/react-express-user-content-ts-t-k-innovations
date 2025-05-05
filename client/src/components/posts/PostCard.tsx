@@ -13,7 +13,11 @@ export const PostCard = ({ post }: PostCardProps) => {
     <div className="post-card">
       {post.image && (
         <div className="post-image">
-          <img src={post.image} alt={post.title} />
+          <img
+            src={`http://localhost:3000${post.image}`}
+            alt={post.title}
+            className="post-image"
+          />
         </div>
       )}
       <div className="post-content">
