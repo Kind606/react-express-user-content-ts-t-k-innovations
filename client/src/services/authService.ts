@@ -28,7 +28,6 @@ export const getCurrentUser = async (): Promise<User> => {
   return response.data;
 };
 
-// Admin functions
 export const getAllUsers = async (): Promise<User[]> => {
   const response = await api.get("/users");
   return response.data;

@@ -1,11 +1,9 @@
 import api from "./api";
 import { Post } from "../types/Post";
 
-// Authentication functions (this should be in authService.ts, but keeping for reference)
 export const login = (username: string, password: string) =>
   api.post("/users/login", { username, password });
 
-// Post-related API functions
 export const getAllPosts = async (): Promise<Post[]> => {
   const response = await api.get("/posts");
   return response.data;
@@ -19,7 +17,7 @@ export const getPostById = async (id: string): Promise<Post> => {
 export const createPost = async (formData: FormData): Promise<Post> => {
   const response = await api.post("/posts", formData, {
     headers: {
-      "Content-Type": "multipart/form-data", // This is critical
+      "Content-Type": "multipart/form-data",
     },
   });
   return response.data;
