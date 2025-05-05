@@ -16,7 +16,6 @@ const RegisterForm = () => {
     clearError();
     setValidationError("");
 
-    // Basic validation
     if (!username || !password) {
       setValidationError("Username and password are required");
       return;
@@ -36,7 +35,6 @@ const RegisterForm = () => {
       await register(username, password);
       navigate("/");
     } catch (err) {
-      // Error is handled by the auth context
       console.error("Registration error:", err);
     }
   };

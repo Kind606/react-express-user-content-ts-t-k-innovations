@@ -15,7 +15,6 @@ const CreatePostPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  // Redirect if not logged in
   if (!user) {
     navigate("/login", {
       state: { message: "You must be logged in to create a post" },
@@ -39,7 +38,6 @@ const CreatePostPage = () => {
     if (file) {
       setImage(file);
 
-      // Create image preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);

@@ -96,7 +96,6 @@ const EditPostPage = () => {
     if (image) {
       formData.append("image", image);
     } else if (post?.image && keepExistingImage) {
-      // For handling existing images
       formData.append("keepExistingImage", "true");
     }
 

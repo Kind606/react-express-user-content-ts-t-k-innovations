@@ -6,13 +6,11 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Ensure upload directory exists
 const uploadDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -24,11 +22,10 @@ const storage = multer.diskStorage({
   },
 });
 
-// Create upload middleware
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -82,7 +79,6 @@ const createPost = async (req: Request, res: Response) => {
       return res.status(400).json("Invalid content");
     }
 
-    // Use the uploaded file path if available
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     const post = new PostModel({
@@ -129,7 +125,6 @@ const updatePost = async (req: Request, res: Response) => {
       updateData.content = content;
     }
 
-    // Add image if file was uploaded
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
     }
