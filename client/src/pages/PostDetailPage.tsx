@@ -38,11 +38,7 @@ const PostDetailPage = () => {
   };
 
   const canModify =
-    user &&
-    (user.isAdmin ||
-      (post &&
-        typeof post.author !== "string" &&
-        post.author._id === user._id));
+    user && (user.isAdmin || (post && post.author._id === user._id));
 
   if (isLoading) {
     return <div className="loading">Loading post...</div>;
@@ -65,12 +61,7 @@ const PostDetailPage = () => {
       <div className="post-header">
         <h1>{post.title}</h1>
         <div className="post-meta">
-          <span>
-            By:{" "}
-            {typeof post.author === "string"
-              ? post.author
-              : post.author.username}
-          </span>
+          <span>By: {post.author.username}</span>
           <span>Posted: {new Date(post.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
