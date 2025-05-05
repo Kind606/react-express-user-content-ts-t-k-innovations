@@ -19,11 +19,12 @@ export const PostCard = ({ post }: PostCardProps) => {
 
   return (
     <Card sx={{ maxWidth: 345, margin: "16px auto", boxShadow: 3 }}>
-      {post.image && (
+      {post.image && (        
+        </div>
         <CardMedia
           component="img"
           height="140"
-          image={post.image}
+          image={`http://localhost:3000${post.image}`}
           alt={post.title}
         />
       )}

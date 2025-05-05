@@ -1,5 +1,6 @@
 import cookieSession from "cookie-session";
 import express from "express";
+import path from "path";
 import { errorHandler } from "./middlewares";
 import { postRouter } from "./posts/post-router";
 import userRouter from "./users/user-router";
@@ -16,6 +17,8 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000,
   })
 );
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);

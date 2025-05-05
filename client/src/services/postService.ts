@@ -16,18 +16,22 @@ export const getPostById = async (id: string): Promise<Post> => {
   return response.data;
 };
 
-export const createPost = async (
-  postData: Omit<Post, "_id" | "author">
-): Promise<Post> => {
-  const response = await api.post("/posts", postData);
+export const createPost = async (formData: FormData): Promise<Post> => {
+  const response = await api.post("/posts", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data", // This is critical
+    },
+  });
   return response.data;
 };
 
-export const updatePost = async (
-  id: string,
-  postData: Partial<Post>
-): Promise<Post> => {
-  const response = await api.put(`/posts/${id}`, postData);
+export const updatePost = async (formData: FormData): Promise<Post> => {
+  const id = formData.get("id") as string;
+  const response = await api.put(`/posts/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 

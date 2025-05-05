@@ -1,10 +1,13 @@
 import { AppBar, Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const Header = () => {
-  //replace it with actual auth logic later
-  const isLoggedIn = false;
-  const isAdmin = false;
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <AppBar color="default" position="static">
@@ -42,8 +45,24 @@ const Header = () => {
             <Button color="inherit">Post</Button>
           </Link>
 
-          {isLoggedIn ? (
+          {user ? (
             <>
+              <li>
+                <Link to="/create-post">Create Post</Link>
+              </li>
+              <li>
+                <Link to="/profile">Profile</Link>
+              </li>
+              {user.isAdmin && (
+                <li>
+                  <Link to="/admin">Admin</Link>
+                </li>
+              )}
+              <li>
+                <button onClick={handleLogout} className="logout-button">
+                  Logout
+                </button>
+              </li>
               <Link to="/create-post">
                 <Button color="inherit">Create Post</Button>
               </Link>

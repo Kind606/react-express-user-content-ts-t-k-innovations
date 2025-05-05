@@ -61,8 +61,8 @@ const PostDetailPage = () => {
       <div className="post-header">
         <h1>{post.title}</h1>
         <div className="post-meta">
-          <span>By: {post.author.username}</span>
-          <span>Posted: {new Date(post.createdAt).toLocaleDateString()}</span>
+          <span>By: {post.author}</span>
+          <span>Posted: {new Date(post).toLocaleDateString()}</span>
         </div>
       </div>
 
