@@ -2,8 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   CardMedia,
   CircularProgress,
   Typography,
@@ -82,7 +80,6 @@ const PostDetailPage = () => {
   }
 
   return (
-   
     <Box
       sx={{
         maxWidth: 800,
@@ -91,15 +88,15 @@ const PostDetailPage = () => {
         boxShadow: 3,
         borderRadius: 2,
         backgroundColor: "#fff",
-      }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {post.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          By:{" "}
-          {typeof post.author === "string" ? post.author : post.author.username}
-        </Typography>
-     
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
+        {post.title}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" gutterBottom>
+        By:{" "}
+        {typeof post.author === "string" ? post.author : post.author.username}
+      </Typography>
 
       {post.image && (
         <CardMedia
@@ -111,11 +108,9 @@ const PostDetailPage = () => {
         />
       )}
 
-   
-        <Typography variant="body1" paragraph>
-          {post.content}
-        </Typography>
-    
+      <Typography variant="body1" paragraph>
+        {post.content}
+      </Typography>
 
       {canModify && (
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
