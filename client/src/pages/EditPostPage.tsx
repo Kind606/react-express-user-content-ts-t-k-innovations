@@ -92,12 +92,10 @@ const EditPostPage = () => {
     formData.append("id", id as string);
     formData.append("title", title);
     formData.append("content", content);
+    formData.append("keepExistingImage", keepExistingImage.toString());
 
     if (image) {
       formData.append("image", image);
-    } else if (post?.image && keepExistingImage) {
-      // For handling existing images
-      formData.append("keepExistingImage", "true");
     }
 
     updatePostMutation.mutate(formData);

@@ -2,48 +2,6 @@ import { Request, Response, Router } from "express";
 import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
 import { PostModel } from "./post-model";
 import { Types } from "mongoose";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, "../../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-  },
-});
-
-// Create upload middleware
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed!"));
-    }
-  },
-});
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
@@ -53,6 +11,7 @@ const getAllPosts = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error fetching posts" });
   }
 };
+
 
 const getPostById = async (req: Request, res: Response) => {
   try {
@@ -82,14 +41,11 @@ const createPost = async (req: Request, res: Response) => {
       return res.status(400).json("Invalid content");
     }
 
-    // Use the uploaded file path if available
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
-
     const post = new PostModel({
       title,
       content,
       author: new Types.ObjectId(req.session!.id),
-      image: imageUrl,
+      image: req.body.image,
     });
 
     await post.save();
@@ -102,41 +58,46 @@ const createPost = async (req: Request, res: Response) => {
 
 const updatePost = async (req: Request, res: Response) => {
   try {
-    if (Object.keys(req.body).length === 0 && !req.file) {
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json("No update data provided");
     }
 
-    const { title, content } = req.body;
-    const updateData: any = {};
+    const { title, content, image, author } = req.body;
 
-    if (title !== undefined) {
-      if (typeof title !== "string") {
-        return res.status(400).json("Invalid title");
-      }
-      if (title.trim() === "") {
-        return res.status(400).json("Title cannot be empty");
-      }
-      updateData.title = title;
+    if (title === undefined) {
+      return res.status(400).json("Missing title");
+    }
+    if (typeof title !== "string") {
+      return res.status(400).json("Invalid title");
+    }
+    if (title.trim() === "") {
+      return res.status(400).json("Title cannot be empty");
     }
 
-    if (content !== undefined) {
-      if (typeof content !== "string") {
-        return res.status(400).json("Invalid content");
-      }
-      if (content.trim() === "") {
-        return res.status(400).json("Content cannot be empty");
-      }
-      updateData.content = content;
+    if (content === undefined) {
+      return res.status(400).json("Missing content");
+    }
+    if (typeof content !== "string") {
+      return res.status(400).json("Invalid content");
+    }
+    if (content.trim() === "") {
+      return res.status(400).json("Content cannot be empty");
     }
 
-    // Add image if file was uploaded
-    if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+    if (author === undefined) {
+      return res.status(400).json("Missing author");
+    }
+    if (typeof author === "string") {
+      if (!Types.ObjectId.isValid(author)) {
+        return res.status(400).json("Invalid author");
+      }
+    } else if (!(author instanceof Types.ObjectId)) {
+      return res.status(400).json("Invalid author");
     }
 
     const updatedPost = await PostModel.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      { title, content, image, author },
       { new: true, runValidators: true }
     );
 
@@ -169,6 +130,7 @@ export const postRouter = Router();
 postRouter.get("/", getAllPosts);
 postRouter.get("/:id", getPostById);
 
-postRouter.post("/", isAuthenticated, upload.single("image"), createPost);
-postRouter.put("/:id", isOwnerOrAdmin, upload.single("image"), updatePost);
+postRouter.post("/", isAuthenticated, createPost);
+postRouter.put("/:id", isOwnerOrAdmin, updatePost);
 postRouter.delete("/:id", isOwnerOrAdmin, deletePost);
+

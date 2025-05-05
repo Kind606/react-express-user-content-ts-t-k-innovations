@@ -1,51 +1,44 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
-const RegisterForm = () => {
+function RegisterForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [validationError, setValidationError] = useState("");
-
-  const { register, error, clearError } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
-    setValidationError("");
+    setError(null);
+    setSuccess(null);
 
-    if (!username || !password) {
-      setValidationError("Username and password are required");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setValidationError("Passwords don't match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setValidationError("Password must be at least 6 characters");
-      return;
-    }
+    console.log("Attempting to register with:", { username, password });
 
     try {
-      await register(username, password);
-      navigate("/");
-    } catch (err) {
+      const response = await api.post("/users/register", {
+        username,
+        password,
+      });
+
+      console.log("Register response status:", response.status);
+      console.log("Registration successful:", response.data);
+
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000); // Redirect to login page after 2 seconds
+    } catch (err: any) {
       console.error("Registration error:", err);
+      setError(err.response?.data || "An unexpected error occurred");
     }
   };
 
   return (
-    <div className="auth-form">
-      <h2>Create an Account</h2>
-
+    <div>
+      <h2>Register</h2>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
+        <div>
+          <label htmlFor="username">Username:</label>
           <input
             type="text"
             id="username"
@@ -54,9 +47,8 @@ const RegisterForm = () => {
             required
           />
         </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
+        <div>
+          <label htmlFor="password">Password:</label>
           <input
             type="password"
             id="password"
@@ -65,31 +57,12 @@ const RegisterForm = () => {
             required
           />
         </div>
-
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        {validationError && <p className="error-message">{validationError}</p>}
-        {error && <p className="error-message">{error}</p>}
-
-        <button type="submit" className="submit-button">
-          Register
-        </button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {success && <p style={{ color: "green" }}>{success}</p>}
+        <button type="submit">Register</button>
       </form>
-
-      <p className="auth-link">
-        Already have an account? <Link to="/login">Log in</Link>
-      </p>
     </div>
   );
-};
+}
 
 export default RegisterForm;
