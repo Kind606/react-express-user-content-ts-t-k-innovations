@@ -1,7 +1,13 @@
+import {
+  Alert,
+  CircularProgress,
+  Container,
+  Grid,
+  Typography,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { getAllPosts } from "../services/postService";
 import { PostCard } from "../components/posts/PostCard";
+import { getAllPosts } from "../services/postService";
 import { Post } from "../types/Post";
 
 const PostsPage = () => {
@@ -16,37 +22,49 @@ const PostsPage = () => {
   });
 
   if (isLoading) {
-    return <div className="loading">Loading posts...</div>;
+    return (
+      <Container sx={{ textAlign: "center", marginTop: 4 }}>
+        <CircularProgress />
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
+          Loading posts...
+        </Typography>
+      </Container>
+    );
   }
 
   if (isError) {
     return (
-      <div className="error-message">
-        Error: {error?.message || "Failed to load posts"}
-      </div>
+      <Container sx={{ textAlign: "center", marginTop: 4 }}>
+        <Alert severity="error">
+          {error?.message || "Failed to load posts"}
+        </Alert>
+      </Container>
     );
   }
 
   return (
-    <div className="posts-page">
-      <div className="page-header">
-        <h1>Posts</h1>
-        <Link to="/create-post" className="create-post-button">
-          Create New Post
-        </Link>
-      </div>
+    <Container sx={{ marginTop: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Posts
+      </Typography>
       {posts && posts.length > 0 ? (
-        <div className="posts-grid">
+        <Grid container spacing={3}>
           {posts.map((post: Post) => (
-            <PostCard key={post._id} post={post} />
+            <Grid item xs={12} sm={6} md={4} key={post._id}>
+              <PostCard post={post} />
+            </Grid>
           ))}
-        </div>
+        </Grid>
       ) : (
-        <div className="no-posts">
-          <p>No posts available</p>
-        </div>
+        <Typography
+          variant="body1"
+          color="textSecondary"
+          sx={{ textAlign: "center", marginTop: 4 }}
+        >
+          No posts available
+        </Typography>
       )}
-    </div>
+    </Container>
   );
 };
 

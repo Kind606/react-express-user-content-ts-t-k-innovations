@@ -8,12 +8,12 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        backgroundColor: "#333", // Darker background
-        color: "#fff", // White text for contrast
-        padding: 3, // Increased padding for a larger footer
+        backgroundColor: "#333", 
+        color: "#fff", 
+        padding: 3, 
         marginTop: "auto",
         textAlign: "center",
-        borderTop: "1px solid #444", // Subtle border for separation
+        borderTop: "1px solid #444", 
       }}
     >
       <Typography variant="body1" gutterBottom>
@@ -25,7 +25,7 @@ const Footer = () => {
           to="/about"
           color="inherit"
           underline="hover"
-          sx={{ fontSize: "1rem" }} // Slightly larger font size
+          sx={{ fontSize: "1rem" }} 
         >
           About
         </MuiLink>
@@ -34,7 +34,7 @@ const Footer = () => {
           to="/terms"
           color="inherit"
           underline="hover"
-          sx={{ fontSize: "1rem" }} // Slightly larger font size
+          sx={{ fontSize: "1rem" }} 
         >
           Terms
         </MuiLink>
@@ -43,7 +43,7 @@ const Footer = () => {
           to="/privacy"
           color="inherit"
           underline="hover"
-          sx={{ fontSize: "1rem" }} // Slightly larger font size
+          sx={{ fontSize: "1rem" }}
         >
           Privacy
         </MuiLink>
