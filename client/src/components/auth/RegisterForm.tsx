@@ -1,84 +1,95 @@
-import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
-function RegisterForm() {
+const RegisterForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const { register, error, clearError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    clearError();
+    setValidationError("");
 
-    console.log("Attempting to register with:", { username, password });
+    if (!username || !password) {
+      setValidationError("Username and password are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setValidationError("Passwords don't match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setValidationError("Password must be at least 6 characters");
+      return;
+    }
 
     try {
-      const response = await api.post("/users/register", {
-        username,
-        password,
-      });
-
-      console.log("Register response status:", response.status);
-      console.log("Registration successful:", response.data);
-
-      setSuccess("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000); // Redirect to login page after 2 seconds
-    } catch (err: any) {
+      await register(username, password);
+      navigate("/");
+    } catch (err) {
       console.error("Registration error:", err);
-      setError(err.response?.data || "An unexpected error occurred");
     }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        maxWidth: 400,
-        margin: "0 auto",
-        marginTop: 4,
-        padding: 3,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#fff",
-      }}
-    >
-      <Typography variant="h4" component="h1" textAlign="center" gutterBottom>
-        Register
-      </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      {success && <Alert severity="success">{success}</Alert>}
-      <TextField
-        label="Username"
-        variant="outlined"
-        fullWidth
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-        autoComplete="username"
-      />
-      <TextField
-        label="Password"
-        type="password"
-        variant="outlined"
-        fullWidth
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <Button type="submit" variant="contained" color="primary" fullWidth>
-        Register
-      </Button>
-    </Box>
+    <div className="auth-form">
+      <h2>Create an Account</h2>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {validationError && <p className="error-message">{validationError}</p>}
+        {error && <p className="error-message">{error}</p>}
+
+        <button type="submit" className="submit-button">
+          Register
+        </button>
+      </form>
+
+      <p className="auth-link">
+        Already have an account? <Link to="/login">Log in</Link>
+      </p>
+    </div>
   );
-}
+};
 
 export default RegisterForm;

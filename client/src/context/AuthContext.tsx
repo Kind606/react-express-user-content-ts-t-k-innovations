@@ -1,59 +1,123 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useState, useEffect, ReactNode } from "react";
 import api from "../services/api";
 import { User } from "../types/User";
 
-interface AuthContextProps {
+interface AuthContextType {
   user: User | null;
+  loading: boolean;
+  error: string | null;
   login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean;
+  clearError: () => void;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: false,
+  error: null,
+  login: async () => {},
+  register: async () => {},
+  logout: async () => {},
+  clearError: () => {},
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const checkAuthStatus = async () => {
       try {
-        const response = await api.get("/users/me");
+        const response = await api.get("/users/current");
         setUser(response.data);
       } catch {
         setUser(null);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchUser();
+    checkAuthStatus();
   }, []);
 
   const login = async (username: string, password: string) => {
-    const response = await api.post("/users/login", { username, password });
-    setUser(response.data);
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.post("/users/login", { username, password });
+      setUser(response.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (err && typeof err === "object" && "response" in err) {
+        // Axios error
+        const axiosErr = err as { response?: { data?: string } };
+        setError(axiosErr.response?.data || "Login failed");
+      } else {
+        setError("Login failed. Please try again.");
+      }
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (username: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.post("/users/register", {
+        username,
+        password,
+      });
+      setUser(response.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (err && typeof err === "object" && "response" in err) {
+        // Axios error
+        const axiosErr = err as { response?: { data?: string } };
+        setError(axiosErr.response?.data || "Registration failed");
+      } else {
+        setError("Registration failed. Please try again.");
+      }
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
-    await api.post("/users/logout");
-    setUser(null);
-    window.location.reload();
+    try {
+      setLoading(true);
+      await api.post("/users/logout");
+      setUser(null);
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const clearError = () => {
+    setError(null);
+  };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    clearError,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

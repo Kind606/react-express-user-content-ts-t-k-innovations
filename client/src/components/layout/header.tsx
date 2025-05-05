@@ -1,82 +1,59 @@
-import { AppBar, Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 const Header = () => {
   const { user, logout } = useAuth();
 
-  return (
-    <AppBar color="default" position="static">
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: 2,
-        }}
-      >
-        {/* Logo */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            mr: 2,
-            cursor: "pointer",
-          }}
-        >
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              fontSize: "30px",
-              fontWeight: "bolder",
-            }}
-          >
-            Content Platform
-          </Link>
-        </Box>
+  const handleLogout = async () => {
+    await logout();
+  };
 
-        {/* Navigation Links */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Link to="/posts">
-            <Button color="inherit">Posts</Button>
-          </Link>
+  return (
+    <header className="header">
+      <div className="logo">
+        <Link to="/">Content Platform</Link>
+      </div>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/posts">Posts</Link>
+          </li>
 
           {user ? (
             <>
-              <Link to="/create-post">
-                <Button color="inherit">Create Post</Button>
-              </Link>
-
-              <Link to="/profile">
-                <Button color="inherit">Profile</Button>
-              </Link>
-
+              <li>
+                <Link to="/create-post">Create Post</Link>
+              </li>
+              <li>
+                <Link to="/profile">Profile</Link>
+              </li>
               {user.isAdmin && (
-                <Link to="/admin">
-                  <Button color="inherit">Admin</Button>
-                </Link>
+                <li>
+                  <Link to="/admin">Admin</Link>
+                </li>
               )}
-
-              <Button color="inherit" onClick={logout}>
-                Logout
-              </Button>
+              <li>
+                <button onClick={handleLogout} className="logout-button">
+                  Logout
+                </button>
+              </li>
             </>
           ) : (
             <>
-              <Link to="/login">
-                <Button color="inherit">Login</Button>
-              </Link>
-
-              <Link to="/register">
-                <Button color="inherit">Register</Button>
-              </Link>
+              <li>
+                <Link to="/login">Login</Link>
+              </li>
+              <li>
+                <Link to="/register">Register</Link>
+              </li>
             </>
           )}
-        </Box>
-      </Box>
-    </AppBar>
+        </ul>
+      </nav>
+    </header>
   );
 };
 

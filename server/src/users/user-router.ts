@@ -1,7 +1,8 @@
 import argon2 from "argon2";
-import express, { Request, Response } from "express";
-import { isAdmin, isAuthenticated } from "../middlewares";
+import { Request, Response } from "express";
 import { UserModel } from "./user-model";
+import express from "express";
+import { isAuthenticated, isAdmin } from "../middlewares";
 
 const userRouter = express.Router();
 
@@ -72,19 +73,6 @@ userRouter.post("/login", async (req, res) => {
 userRouter.post("/logout", (req, res) => {
   req.session = null;
   res.sendStatus(204);
-});
-
-// Get current user session
-userRouter.get("/me", (req, res) => {
-  if (!req.session || !req.session.id) {
-    return res.status(401).json("Not authenticated");
-  }
-
-  res.status(200).json({
-    _id: req.session.id,
-    username: req.session.username,
-    isAdmin: req.session.isAdmin,
-  });
 });
 
 // ADMIN ROUTES

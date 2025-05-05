@@ -1,78 +1,64 @@
-import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../../services/postService";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+
+  const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    console.log("Attempting to log in with:", { username, password });
+    clearError();
 
     try {
-      const response = await login(username, password);
-
-      console.log("Login response status:", response.status);
-      console.log("Login successful:", response.data);
-
-      navigate("/posts");
-      window.location.reload();
+      await login(username, password);
+      navigate("/");
     } catch (err) {
       console.error("Login error:", err);
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
     }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        maxWidth: 400,
-        margin: "0 auto",
-        marginTop: 4,
-        padding: 3,
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#fff",
-      }}
-    >
-      <Typography variant="h4" component="h1" textAlign="center" gutterBottom>
-        Login
-      </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      <TextField
-        label="Username"
-        variant="outlined"
-        fullWidth
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <TextField
-        label="Password"
-        type="password"
-        variant="outlined"
-        fullWidth
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <Button type="submit" variant="contained" color="primary" fullWidth>
-        Login
-      </Button>
-    </Box>
+    <div className="auth-form">
+      <h2>Login</h2>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <button type="submit" className="submit-button">
+          Login
+        </button>
+      </form>
+
+      <p className="auth-link">
+        Don't have an account? <Link to="/register">Register</Link>
+      </p>
+    </div>
   );
 }
 
