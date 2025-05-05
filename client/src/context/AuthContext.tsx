@@ -31,14 +31,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         const response = await api.get("/users/current");
         setUser(response.data);
       } catch {
-        // User is not logged in, which is fine
         setUser(null);
       } finally {
         setLoading(false);

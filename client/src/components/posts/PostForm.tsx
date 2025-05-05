@@ -25,7 +25,6 @@ const PostForm = ({
   const [keepExistingImage, setKeepExistingImage] = useState(true);
   const [validationError, setValidationError] = useState("");
 
-  // Initialize form with existing data if editing
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
@@ -42,7 +41,6 @@ const PostForm = ({
       setImage(file);
       setKeepExistingImage(false);
 
-      // Create image preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -55,7 +53,6 @@ const PostForm = ({
     e.preventDefault();
     setValidationError("");
 
-    // Validate input
     if (!title.trim()) {
       setValidationError("Title is required");
       return;
@@ -66,7 +63,6 @@ const PostForm = ({
       return;
     }
 
-    // Create FormData for submission
     const formData = new FormData();
 
     if (initialData?._id) {

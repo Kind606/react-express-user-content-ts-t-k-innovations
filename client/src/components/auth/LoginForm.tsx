@@ -17,7 +17,6 @@ function LoginForm() {
       await login(username, password);
       navigate("/");
     } catch (err) {
-      // Error is handled by the auth context
       console.error("Login error:", err);
     }
   };
