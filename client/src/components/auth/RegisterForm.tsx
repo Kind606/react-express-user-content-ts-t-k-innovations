@@ -46,7 +46,7 @@ const RegisterForm = () => {
       onSubmit={handleSubmit}
       sx={{
         maxWidth: 400,
-        margin: "0 auto",
+        margin: "50px auto",
         padding: 3,
         display: "flex",
         flexDirection: "column",
