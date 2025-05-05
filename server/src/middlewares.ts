@@ -1,3 +1,15 @@
+// import { ErrorRequestHandler } from "express";
+// import { MongooseError } from "mongoose";
+
+// export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+//   console.error(err);
+//   if (err instanceof MongooseError) {
+//     res.status(404).json(err.message);
+//     return;
+//   }
+
+//   res.status(500).json("Internal server error");
+// };
 import { NextFunction, Request, Response } from "express";
 
 export const errorHandler = (
@@ -30,8 +42,10 @@ export const isOwnerOrAdmin = async (
     return res.status(401).json("Authentication required");
   }
 
+  // The post ID will be in req.params.id for update/delete operations
   const postId = req.params.id;
 
+  // For operations like get all posts, there's no specific post to check
   if (!postId) {
     return next();
   }
@@ -45,6 +59,7 @@ export const isOwnerOrAdmin = async (
       return res.status(404).json(`Post with id ${postId} not found`);
     }
 
+    // Allow if user is post owner or admin
     if (post.author.toString() === req.session.id || req.session.isAdmin) {
       return next();
     }

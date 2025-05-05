@@ -6,6 +6,7 @@ import { isAuthenticated, isAdmin } from "../middlewares";
 
 const userRouter = express.Router();
 
+// Register
 userRouter.post("/register", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
@@ -39,6 +40,7 @@ userRouter.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+// Login
 userRouter.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -67,18 +69,22 @@ userRouter.post("/login", async (req, res) => {
   });
 });
 
+// Logout
 userRouter.post("/logout", (req, res) => {
   req.session = null;
   res.sendStatus(204);
 });
 
+// ADMIN ROUTES
+
+// Get all users (admin only)
 userRouter.get(
   "/",
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
     try {
-      const users = await UserModel.find({}, { password: 0 });
+      const users = await UserModel.find({}, { password: 0 }); // Exclude password field
       res.status(200).json(users);
     } catch (error) {
       res.status(500).json("Error fetching users");
@@ -86,6 +92,7 @@ userRouter.get(
   }
 );
 
+// Update user (admin only)
 userRouter.put(
   "/:id",
   isAuthenticated,
@@ -107,7 +114,7 @@ userRouter.put(
       const updatedUser = await UserModel.findByIdAndUpdate(
         req.params.id,
         updateData,
-        { new: true, select: "-password" }
+        { new: true, select: "-password" } // Return updated document without password
       );
 
       if (!updatedUser) {
@@ -121,6 +128,7 @@ userRouter.put(
   }
 );
 
+// Delete user (admin only)
 userRouter.delete(
   "/:id",
   isAuthenticated,
