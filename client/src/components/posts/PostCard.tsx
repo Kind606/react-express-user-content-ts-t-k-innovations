@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Post } from "../../types/Post";
+import { ImageResponse } from "../../types/Image";
+import { getImageUrl } from "../../services/imageService";
 
 interface PostCardProps {
   post: Post;
@@ -16,6 +18,18 @@ interface PostCardProps {
 export const PostCard = ({ post }: PostCardProps) => {
   const authorName =
     typeof post.author === "string" ? post.author : post.author?.username;
+
+  const getImageSrc = () => {
+    if (!post.image) return null;
+
+    if (typeof post.image === "string") {
+      return getImageUrl(post.image);
+    } else {
+      return getImageUrl((post.image as ImageResponse)._id);
+    }
+  };
+
+  const imageUrl = getImageSrc();
 
   return (
     <Card
@@ -26,11 +40,11 @@ export const PostCard = ({ post }: PostCardProps) => {
         overflow: "hidden",
       }}
     >
-      {post.image && (
+      {imageUrl && (
         <CardMedia
           component="img"
           height="140"
-          image={post.image}
+          image={imageUrl}
           alt={post.title}
         />
       )}

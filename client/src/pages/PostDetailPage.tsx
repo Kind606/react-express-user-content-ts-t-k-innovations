@@ -11,6 +11,8 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { deletePost, getPostById } from "../services/postService";
+import { getImageUrl } from "../services/imageService";
+import { ImageResponse } from "../types/Image";
 
 const PostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +54,16 @@ const PostDetailPage = () => {
         typeof post.author !== "string" &&
         post.author._id === user._id));
 
+  const getImageSrc = () => {
+    if (!post?.image) return null;
+
+    if (typeof post.image === "string") {
+      return getImageUrl(post.image);
+    } else {
+      return getImageUrl((post.image as ImageResponse)._id);
+    }
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ textAlign: "center", marginTop: 4 }}>
@@ -79,6 +91,8 @@ const PostDetailPage = () => {
     );
   }
 
+  const imageUrl = getImageSrc();
+
   return (
     <Box
       sx={{
@@ -98,13 +112,13 @@ const PostDetailPage = () => {
         {typeof post.author === "string" ? post.author : post.author.username}
       </Typography>
 
-      {post.image && (
+      {imageUrl && (
         <CardMedia
           component="img"
           height="300"
-          image={post.image}
+          image={imageUrl}
           alt={post.title}
-          sx={{ marginBottom: 2 }}
+          sx={{ marginBottom: 2, borderRadius: 1 }}
         />
       )}
 

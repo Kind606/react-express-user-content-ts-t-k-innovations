@@ -2,9 +2,9 @@ import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImagePrevRemove from "../components/ImagePrevRemove"; // Import the component
 import { useAuth } from "../hooks/useAuth";
 import { createPost } from "../services/postService";
+import ImagePrevRemove from "../components/ImagePrevRemove";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
@@ -148,8 +148,9 @@ const CreatePostPage = () => {
           color="primary"
           fullWidth
           sx={{ marginBottom: 2 }}
+          disabled={createPostMutation.isPending}
         >
-          Create Post
+          {createPostMutation.isPending ? "Creating..." : "Create Post"}
         </Button>
       </form>
     </Box>
