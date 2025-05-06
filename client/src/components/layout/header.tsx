@@ -42,9 +42,6 @@ const Header = () => {
               <Button component={Link} to="/create-post" color="inherit">
                 Create Post
               </Button>
-              <Button component={Link} to="/profile" color="inherit">
-                Profile
-              </Button>
               {user.isAdmin && (
                 <Button component={Link} to="/admin" color="inherit">
                   Admin
