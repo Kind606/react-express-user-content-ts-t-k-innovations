@@ -67,6 +67,22 @@ userRouter.post("/login", async (req, res) => {
   });
 });
 
+userRouter.get("/current", async (req, res) => {
+  if (!req.session || !req.session.id) {
+    return res.status(401).json("Not authenticated");
+  }
+
+  try {
+    const user = await UserModel.findById(req.session.id, { password: 0 });
+    if (!user) {
+      return res.status(404).json("User not found");
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json("Error fetching user");
+  }
+});
+
 userRouter.post("/logout", (req, res) => {
   req.session = null;
   res.sendStatus(204);

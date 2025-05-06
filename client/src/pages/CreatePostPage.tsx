@@ -1,11 +1,4 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -149,14 +142,9 @@ const CreatePostPage = () => {
           variant="contained"
           color="primary"
           fullWidth
-          disabled={createPostMutation.isLoading}
           sx={{ marginBottom: 2 }}
         >
-          {createPostMutation.isLoading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            "Create Post"
-          )}
+          Create Post
         </Button>
       </form>
     </Box>

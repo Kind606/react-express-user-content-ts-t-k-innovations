@@ -1,14 +1,16 @@
+import { Box, CircularProgress } from "@mui/material";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/layout/Layout";
-import HomePage from "./pages/HomePage";
-import PostsPage from "./pages/PostsPage";
-import PostDetailPage from "./pages/PostDetailPage";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./hooks/useAuth";
+import AdminPage from "./pages/AdminPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import EditPostPage from "./pages/EditPostPage";
-import AdminPage from "./pages/AdminPage";
 import ErrorPage from "./pages/ErrorPage";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import PostDetailPage from "./pages/PostDetailPage";
+import PostsPage from "./pages/PostsPage";
 import RegisterPage from "./pages/RegisterPage";
 
 const router = createBrowserRouter([
@@ -31,6 +33,23 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <AuthProvider>
       <RouterProvider router={router} />
