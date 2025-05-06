@@ -4,6 +4,7 @@ import path from "path";
 import { errorHandler } from "./middlewares";
 import { postRouter } from "./posts/post-router";
 import userRouter from "./users/user-router";
+import { imageRouter } from "./images/image-router";
 
 require("express-async-errors");
 
@@ -22,5 +23,6 @@ app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);
+app.use("/api/images", imageRouter);
 
 app.use(errorHandler);
