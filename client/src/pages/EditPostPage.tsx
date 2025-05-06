@@ -1,8 +1,16 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPostById, updatePost } from "../services/postService";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { getPostById, updatePost } from "../services/postService";
 
 const EditPostPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -96,7 +104,6 @@ const EditPostPage = () => {
     if (image) {
       formData.append("image", image);
     } else if (post?.image && keepExistingImage) {
-      // For handling existing images
       formData.append("keepExistingImage", "true");
     }
 
@@ -104,54 +111,95 @@ const EditPostPage = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">Loading post...</div>;
+    return (
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <CircularProgress />
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
+          Loading post...
+        </Typography>
+      </Box>
+    );
   }
 
   if (isError) {
     return (
-      <div className="error-message">
-        Error: {fetchError?.message || "Post not found"}
-      </div>
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <Alert severity="error">
+          {fetchError?.message || "Post not found"}
+        </Alert>
+      </Box>
     );
   }
 
   return (
-    <div className="edit-post-page">
-      <h1>Edit Post</h1>
+    <Box
+      sx={{
+        maxWidth: 600,
+        margin: "50px auto",
+        padding: 3,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
+        Edit Post
+      </Typography>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
+        <TextField
+          label="Title"
+          variant="outlined"
+          fullWidth
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          sx={{ marginBottom: 2 }}
+        />
+        <TextField
+          label="Content"
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={8}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+          sx={{ marginBottom: 2 }}
+        />
+        <Box sx={{ marginBottom: 2 }}>
+          <Typography variant="body1" gutterBottom>
+            Image (Optional)
+          </Typography>
           <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: "block", marginBottom: "8px" }}
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="image">Image</label>
-
           {imagePreview && (
-            <div className="current-image">
-              <img src={imagePreview} alt="Current" />
+            <Box
+              sx={{
+                marginTop: 2,
+                textAlign: "center",
+                border: "1px solid #ddd",
+                padding: 2,
+                borderRadius: 2,
+              }}
+            >
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{ maxWidth: "100%", maxHeight: "200px" }}
+              />
               {post?.image && (
-                <div className="image-options">
+                <Box sx={{ marginTop: 1 }}>
                   <label>
                     <input
                       type="checkbox"
@@ -160,28 +208,23 @@ const EditPostPage = () => {
                     />
                     Keep existing image
                   </label>
-                </div>
+                </Box>
               )}
-            </div>
+            </Box>
           )}
-
-          <input
-            type="file"
-            id="image"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-        </div>
-
-        <button
+        </Box>
+        <Button
           type="submit"
-          className="submit-button"
-          disabled={updatePostMutation.isPending}
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={updatePostMutation.isLoading}
+          sx={{ marginBottom: 2 }}
         >
-          {updatePostMutation.isPending ? "Updating..." : "Update Post"}
-        </button>
+          {updatePostMutation.isLoading ? "Updating..." : "Update Post"}
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 };
 

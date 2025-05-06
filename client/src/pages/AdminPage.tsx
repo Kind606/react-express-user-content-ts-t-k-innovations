@@ -1,8 +1,30 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, updateUser, deleteUser } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
+import { deleteUser, getAllUsers, updateUser } from "../services/authService";
 import { User } from "../types/User";
 
 const AdminPage = () => {
@@ -91,91 +113,108 @@ const AdminPage = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">Loading users...</div>;
+    return (
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <CircularProgress />
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
+          Loading users...
+        </Typography>
+      </Box>
+    );
   }
 
   if (isError) {
     return (
-      <div className="error-message">
-        Error: {error?.message || "Failed to load users"}
-      </div>
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <Alert severity="error">
+          {error?.message || "Failed to load users"}
+        </Alert>
+      </Box>
     );
   }
 
   return (
-    <div className="admin-page">
-      <h1>Admin Dashboard</h1>
-      <h2>User Management</h2>
+    <Box sx={{ maxWidth: 800, margin: "50px auto", padding: 3 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Admin Dashboard
+      </Typography>
+      <Typography variant="h6" component="h2" gutterBottom>
+        User Management
+      </Typography>
 
-      <div className="user-list">
-        <table>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <TableContainer component={Paper} sx={{ marginBottom: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Username</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {users?.map((user: User) => (
-              <tr key={user._id}>
-                <td>{user.username}</td>
-                <td>{user.isAdmin ? "Admin" : "User"}</td>
-                <td>
-                  <button
+              <TableRow key={user._id}>
+                <TableCell>{user.username}</TableCell>
+                <TableCell>{user.isAdmin ? "Admin" : "User"}</TableCell>
+                <TableCell>
+                  <Button
                     onClick={() => handleEditClick(user)}
-                    className="edit-button"
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    sx={{ marginRight: 1 }}
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleDeleteUser(user._id, user.username)}
-                    className="delete-button"
-                    disabled={deleteUserMutation.isPending}
+                    variant="outlined"
+                    color="error"
+                    size="small"
                   >
                     Delete
-                  </button>
-                </td>
-              </tr>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {editingUser && (
-        <div className="edit-user-modal">
-          <div className="modal-content">
-            <h3>Edit User: {editingUser.username}</h3>
-            <form onSubmit={submitRoleChange}>
-              <div className="form-group">
-                <label>
-                  Role:
-                  <select
-                    value={newRole ? "admin" : "user"}
-                    onChange={(e) => setNewRole(e.target.value === "admin")}
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </label>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="save-button">
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingUser(null)}
-                  className="cancel-button"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <Dialog open={!!editingUser} onClose={() => setEditingUser(null)}>
+          <DialogTitle>Edit User: {editingUser.username}</DialogTitle>
+          <DialogContent>
+            <FormControl fullWidth sx={{ marginBottom: 2 }}>
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={newRole ? "admin" : "user"}
+                onChange={(e) => setNewRole(e.target.value === "admin")}
+              >
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setEditingUser(null)}
+              variant="outlined"
+              color="secondary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={submitRoleChange}
+              variant="contained"
+              color="primary"
+            >
+              Save Changes
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
-    </div>
+    </Box>
   );
 };
 

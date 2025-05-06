@@ -1,8 +1,9 @@
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPost } from "../services/postService";
 import { useAuth } from "../hooks/useAuth";
+import { createPost } from "../services/postService";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
@@ -67,58 +68,86 @@ const CreatePostPage = () => {
   };
 
   return (
-    <div className="create-post-page">
-      <h1>Create New Post</h1>
+    <Box
+      sx={{
+        maxWidth: 600,
+        margin: "50px auto",
+        padding: 3,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
+        Create New Post
+      </Typography>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="image">Image (Optional)</label>
+        <TextField
+          label="Title"
+          variant="outlined"
+          fullWidth
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          sx={{ marginBottom: 2 }}
+        />
+        <TextField
+          label="Content"
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={8}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+          sx={{ marginBottom: 2 }}
+        />
+        <Box sx={{ marginBottom: 2 }}>
+          <Typography variant="body1" gutterBottom>
+            Image (Optional)
+          </Typography>
           <input
             type="file"
-            id="image"
             accept="image/*"
             onChange={handleImageChange}
+            style={{ display: "block", marginBottom: "8px" }}
           />
           {imagePreview && (
-            <div className="image-preview">
-              <img src={imagePreview} alt="Preview" />
-            </div>
+            <Box
+              sx={{
+                marginTop: 2,
+                textAlign: "center",
+                border: "1px solid #ddd",
+                padding: 2,
+                borderRadius: 2,
+              }}
+            >
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{ maxWidth: "100%", maxHeight: "200px" }}
+              />
+            </Box>
           )}
-        </div>
-
-        <button
+        </Box>
+        <Button
           type="submit"
-          className="submit-button"
-          disabled={createPostMutation.isPending}
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ marginBottom: 2 }}
         >
-          {createPostMutation.isPending ? "Creating..." : "Create Post"}
-        </button>
+          Create Post
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 };
 

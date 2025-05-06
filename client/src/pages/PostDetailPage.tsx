@@ -1,8 +1,16 @@
+import {
+  Alert,
+  Box,
+  Button,
+  CardMedia,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPostById, deletePost } from "../services/postService";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { deletePost, getPostById } from "../services/postService";
 
 const PostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,65 +53,92 @@ const PostDetailPage = () => {
         post.author._id === user._id));
 
   if (isLoading) {
-    return <div className="loading">Loading post...</div>;
+    return (
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <CircularProgress />
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
+          Loading post...
+        </Typography>
+      </Box>
+    );
   }
 
   if (isError) {
     return (
-      <div className="error-message">
-        Error: {error?.message || "Post not found"}
-      </div>
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <Alert severity="error">{error?.message || "Post not found"}</Alert>
+      </Box>
     );
   }
 
   if (!post) {
-    return <div className="error-message">Post not found</div>;
+    return (
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <Alert severity="error">Post not found</Alert>
+      </Box>
+    );
   }
 
   return (
-    <div className="post-detail-page">
-      <div className="post-header">
-        <h1>{post.title}</h1>
-        <div className="post-meta">
-          <span>
-            By:{" "}
-            {typeof post.author === "string"
-              ? post.author
-              : post.author.username}
-          </span>
-          <span>Posted: {new Date(post.createdAt).toLocaleDateString()}</span>
-        </div>
-      </div>
+    <Box
+      sx={{
+        maxWidth: 800,
+        margin: "50px auto",
+        padding: 3,
+        boxShadow: 3,
+        borderRadius: 2,
+        backgroundColor: "#fff",
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
+        {post.title}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" gutterBottom>
+        By:{" "}
+        {typeof post.author === "string" ? post.author : post.author.username}
+      </Typography>
 
       {post.image && (
-        <div className="post-image">
-          <img src={post.image} alt={post.title} />
-        </div>
+        <CardMedia
+          component="img"
+          height="300"
+          image={post.image}
+          alt={post.title}
+          sx={{ marginBottom: 2 }}
+        />
       )}
 
-      <div className="post-content">
-        <p>{post.content}</p>
-      </div>
+      <Typography variant="body1" paragraph>
+        {post.content}
+      </Typography>
 
       {canModify && (
-        <div className="post-actions">
-          <Link to={`/posts/${post._id}/edit`} className="edit-button">
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+          <Button
+            component={Link}
+            to={`/posts/${post._id}/edit`}
+            variant="contained"
+            color="primary"
+          >
             Edit Post
-          </Link>
-          <button
-            className="delete-button"
+          </Button>
+          <Button
             onClick={handleDelete}
+            variant="outlined"
+            color="error"
             disabled={isDeleting}
           >
             {isDeleting ? "Deleting..." : "Delete Post"}
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
 
-      <Link to="/posts" className="back-button">
-        Back to Posts
-      </Link>
-    </div>
+      <Box sx={{ textAlign: "center", marginTop: 4 }}>
+        <Button component={Link} to="/posts" variant="text">
+          Back to Posts
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
