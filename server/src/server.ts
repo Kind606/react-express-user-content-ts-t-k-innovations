@@ -5,17 +5,24 @@ import { initializeGridFS } from "./utils/gridfs-config";
 
 dotenv.config();
 
-const port = process.env.PORT ?? 3000;
-const dbUrl = process.env.DATABASE_URL ?? "mongodb://localhost:27017/";
+const port = process.env.PORT || 3000;
+const dbUrl =
+  process.env.DATABASE_URL || "mongodb://localhost:27017/content-platform";
 
 async function main() {
-  await mongoose.connect(dbUrl);
+  try {
+    await mongoose.connect(dbUrl);
+    console.log("Connected to MongoDB");
 
-  initializeGridFS();
+    initializeGridFS();
 
-  app.listen(port, () => {
-    console.log(`Server is running: http://localhost:${port}`);
-  });
+    app.listen(port, () => {
+      console.log(`Server is running: http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error);
+    process.exit(1);
+  }
 }
 
-main().catch(console.error);
+main();

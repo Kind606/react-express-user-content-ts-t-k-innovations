@@ -21,5 +21,30 @@ imageSchema.index({ fileId: 1 });
 imageSchema.index({ "metadata.uploadedBy": 1 });
 imageSchema.index({ posts: 1 });
 
-export const ImageModel = model("Image", imageSchema);
-export type Image = InferSchemaType<typeof imageSchema>;
+imageSchema.methods.addPostReference = async function (postId: Types.ObjectId) {
+  if (!this.posts.includes(postId)) {
+    this.posts.push(postId);
+    await this.save();
+  }
+  return this;
+};
+
+imageSchema.methods.removePostReference = async function (
+  postId: Types.ObjectId
+) {
+  this.posts = this.posts.filter((id) => !id.equals(postId));
+
+  if (this.posts.length === 0) {
+    return true;
+  }
+
+  await this.save();
+  return false;
+};
+
+export type ImageDocument = InferSchemaType<typeof imageSchema> & {
+  addPostReference: (postId: Types.ObjectId) => Promise<ImageDocument>;
+  removePostReference: (postId: Types.ObjectId) => Promise<boolean>;
+};
+
+export const ImageModel = model<ImageDocument>("Image", imageSchema);

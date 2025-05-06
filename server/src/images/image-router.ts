@@ -1,10 +1,10 @@
 import { Router, Request, Response } from "express";
-import { Types, isValidObjectId } from "mongoose";
+import { Types } from "mongoose";
 import multer from "multer";
 import { Readable } from "stream";
 import { getImageBucket } from "../utils/gridfs-config";
 import { ImageModel } from "./image-model";
-import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
+import { isAuthenticated, isAdmin } from "../middlewares";
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -15,11 +15,14 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const mimetype = allowedTypes.test(file.mimetype);
+    const extname = allowedTypes.test(
+      file.originalname.toLowerCase().split(".").pop() || ""
+    );
 
-    if (mimetype) {
+    if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Only image files are allowed"));
+      cb(new Error("Only image files (jpg, jpeg, png, gif, webp) are allowed"));
     }
   },
 });
@@ -31,13 +34,17 @@ imageRouter.post(
   isAuthenticated,
   upload.single("image"),
   async (req: Request, res: Response) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No image file provided" });
-    }
-
     try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: "No image file provided",
+        });
+      }
+
       const bucket = getImageBucket();
-      const userId = new Types.ObjectId(req.session!.id);
+      const userId = new Types.ObjectId(req.session!.userId);
+
       const filename = `${Date.now()}-${req.file.originalname.replace(
         /\s+/g,
         "-"
@@ -57,57 +64,123 @@ imageRouter.post(
 
       readableStream.pipe(uploadStream);
 
-      uploadStream.on("finish", async (file) => {
-        const image = new ImageModel({
-          filename: file.filename,
-          contentType: file.contentType,
-          size: file.length,
-          fileId: file._id,
-          metadata: {
-            uploadedBy: userId,
-            originalName: req.file?.originalname,
-          },
+      return new Promise((resolve, reject) => {
+        uploadStream.on("error", (error) => {
+          console.error("Failed to upload image to GridFS:", error);
+          reject(error);
         });
 
-        await image.save();
-        res.status(201).json(image);
+        uploadStream.on("finish", async (file) => {
+          try {
+            const image = new ImageModel({
+              filename: file.filename,
+              contentType: file.contentType,
+              size: file.length,
+              fileId: file._id,
+              metadata: {
+                uploadedBy: userId,
+                originalName: req.file?.originalname,
+              },
+              posts: [],
+            });
+
+            await image.save();
+
+            res.status(201).json({
+              success: true,
+              image: image.toObject(),
+            });
+            resolve();
+          } catch (err) {
+            console.error("Failed to save image metadata:", err);
+            bucket.delete(file._id).catch((deleteErr) => {
+              console.error(
+                "Failed to delete GridFS file after metadata save error:",
+                deleteErr
+              );
+            });
+            reject(err);
+          }
+        });
       });
     } catch (error) {
       console.error("Image upload error:", error);
-      res.status(500).json({ error: "Failed to upload image" });
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to upload image",
+      });
     }
   }
 );
 
 imageRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
+    const imageId = req.params.id;
 
-    if (!isValidObjectId(id)) {
-      return res.status(400).json({ error: "Invalid image ID" });
-    }
-
-    const image = await ImageModel.findById(id);
+    const image = await ImageModel.findById(imageId);
 
     if (!image) {
-      return res.status(404).json({ error: "Image not found" });
+      return res.status(404).json({
+        success: false,
+        error: "Image not found",
+      });
     }
 
     res.set("Content-Type", image.contentType);
     res.set("Cache-Control", "public, max-age=31536000");
+    res.set(
+      "Content-Disposition",
+      `inline; filename="${image.metadata.originalName || image.filename}"`
+    );
 
     const bucket = getImageBucket();
     const downloadStream = bucket.openDownloadStream(image.fileId);
 
-    downloadStream.pipe(res);
-
     downloadStream.on("error", (error) => {
-      console.error("Image download error:", error);
-      res.status(500).json({ error: "Failed to retrieve image" });
+      console.error("Error streaming image:", error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          error: "Failed to retrieve image",
+        });
+      }
     });
+
+    downloadStream.pipe(res);
   } catch (error) {
     console.error("Image retrieval error:", error);
-    res.status(500).json({ error: "Failed to retrieve image" });
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to retrieve image",
+    });
+  }
+});
+
+imageRouter.get("/metadata/:id", async (req: Request, res: Response) => {
+  try {
+    const imageId = req.params.id;
+
+    const image = await ImageModel.findById(imageId);
+
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        error: "Image not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      image: image.toObject(),
+    });
+  } catch (error) {
+    console.error("Error retrieving image metadata:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to retrieve image metadata",
+    });
   }
 });
 
@@ -116,36 +189,89 @@ imageRouter.delete(
   isAuthenticated,
   async (req: Request, res: Response) => {
     try {
-      const id = req.params.id;
+      const imageId = req.params.id;
 
-      if (!isValidObjectId(id)) {
-        return res.status(400).json({ error: "Invalid image ID" });
-      }
-
-      const image = await ImageModel.findById(id);
+      const image = await ImageModel.findById(imageId);
 
       if (!image) {
-        return res.status(404).json({ error: "Image not found" });
+        return res.status(404).json({
+          success: false,
+          error: "Image not found",
+        });
       }
 
-      const isOwner = image.metadata.uploadedBy.toString() === req.session!.id;
-      const isAdmin = req.session!.isAdmin;
+      const isOwner =
+        image.metadata.uploadedBy.toString() === req.session!.userId;
+      const isUserAdmin = req.session!.isAdmin;
 
-      if (!isOwner && !isAdmin) {
-        return res
-          .status(403)
-          .json({ error: "Not authorized to delete this image" });
+      if (!isOwner && !isUserAdmin) {
+        return res.status(403).json({
+          success: false,
+          error: "Not authorized to delete this image",
+        });
+      }
+
+      if (image.posts.length > 0) {
+        return res.status(409).json({
+          success: false,
+          error: "Image is still in use by posts and cannot be deleted",
+          posts: image.posts,
+        });
       }
 
       const bucket = getImageBucket();
       await bucket.delete(image.fileId);
 
-      await ImageModel.findByIdAndDelete(id);
+      await ImageModel.findByIdAndDelete(imageId);
 
-      res.status(204).end();
+      res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+      });
     } catch (error) {
       console.error("Image deletion error:", error);
-      res.status(500).json({ error: "Failed to delete image" });
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to delete image",
+      });
+    }
+  }
+);
+
+imageRouter.get(
+  "/",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const skip = (page - 1) * limit;
+
+      const images = await ImageModel.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      const total = await ImageModel.countDocuments();
+
+      res.json({
+        success: true,
+        images,
+        pagination: {
+          total,
+          page,
+          pages: Math.ceil(total / limit),
+          limit,
+        },
+      });
+    } catch (error) {
+      console.error("Error retrieving images:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to retrieve images",
+      });
     }
   }
 );
