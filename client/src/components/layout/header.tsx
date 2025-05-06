@@ -109,29 +109,29 @@ const Header = () => {
                 onKeyDown={toggleDrawer(false)}
               >
                 <List>
-                  <ListItem button component={Link} to="/">
+                  <ListItem  component={Link} to="/">
                     <ListItemText primary="Home" />
                   </ListItem>
                   {user ? (
                     <>
-                      <ListItem button component={Link} to="/create-post">
+                      <ListItem  component={Link} to="/create-post">
                         <ListItemText primary="Create Post" />
                       </ListItem>
                       {user.isAdmin && (
-                        <ListItem button component={Link} to="/admin">
+                        <ListItem  component={Link} to="/admin">
                           <ListItemText primary="Admin" />
                         </ListItem>
                       )}
-                      <ListItem button onClick={handleLogout}>
+                      <ListItem  onClick={handleLogout}>
                         <ListItemText primary="Logout" />
                       </ListItem>
                     </>
                   ) : (
                     <>
-                      <ListItem button component={Link} to="/login">
+                      <ListItem  component={Link} to="/login">
                         <ListItemText primary="Login" />
                       </ListItem>
-                      <ListItem button component={Link} to="/register">
+                      <ListItem  component={Link} to="/register">
                         <ListItemText primary="Register" />
                       </ListItem>
                     </>
