@@ -36,9 +36,6 @@ const Header = () => {
           <Button component={Link} to="/" color="inherit">
             Home
           </Button>
-          <Button component={Link} to="/posts" color="inherit">
-            Posts
-          </Button>
 
           {user ? (
             <>
