@@ -30,7 +30,7 @@ export const PostCard = ({ post }: PostCardProps) => {
         <CardMedia
           component="img"
           height="140"
-          image={`http://localhost:3000${post.image}`}
+          image={post.image}
           alt={post.title}
         />
       )}

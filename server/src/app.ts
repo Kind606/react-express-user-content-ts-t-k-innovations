@@ -18,7 +18,7 @@ app.use(
   })
 );
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);

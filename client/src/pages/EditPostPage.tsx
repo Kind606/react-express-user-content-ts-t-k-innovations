@@ -218,10 +218,10 @@ const EditPostPage = () => {
           variant="contained"
           color="primary"
           fullWidth
-          disabled={updatePostMutation.isLoading}
+        
           sx={{ marginBottom: 2 }}
         >
-          {updatePostMutation.isLoading ? "Updating..." : "Update Post"}
+         Update Post
         </Button>
       </form>
     </Box>

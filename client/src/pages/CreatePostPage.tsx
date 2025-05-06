@@ -2,6 +2,7 @@ import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ImagePrevRemove from "../components/ImagePrevRemove"; // Import the component
 import { useAuth } from "../hooks/useAuth";
 import { createPost } from "../services/postService";
 
@@ -65,15 +66,6 @@ const CreatePostPage = () => {
     }
 
     createPostMutation.mutate(formData);
-  };
-
-  const removeImagePreview = () => {
-    setImagePreview(null);
-    setImage(null);
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = "";
-    }
   };
 
   return (
@@ -143,17 +135,12 @@ const CreatePostPage = () => {
                 alt="Preview"
                 style={{ maxWidth: "100%", maxHeight: "200px" }}
               />
-
+              <ImagePrevRemove
+                setImagePreview={setImagePreview}
+                setImage={setImage}
+              />
             </Box>
           )}
-           <Button
-                variant="outlined"
-                color="primary"
-                sx={{ marginTop: 2 }}
-                onClick={removeImagePreview}
-              >
-                Remove Image Preview
-              </Button>
         </Box>
         <Button
           type="submit"
