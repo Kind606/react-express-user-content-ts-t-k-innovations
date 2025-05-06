@@ -6,13 +6,13 @@ import multer from "multer";
 import { Readable } from "stream";
 import { ImageModel } from "../images/image-model";
 import { getImageBucket } from "../utils/gridfs-config";
+import { ObjectId } from "bson";
 
-// Configure multer for memory storage instead of disk storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -33,7 +33,7 @@ const getAllPosts = async (req: Request, res: Response) => {
   try {
     const posts = await PostModel.find({})
       .populate("author", "username")
-      .populate("image"); // Populate image data
+      .populate("image");
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: "Error fetching posts" });
@@ -44,7 +44,7 @@ const getPostById = async (req: Request, res: Response) => {
   try {
     const post = await PostModel.findById(req.params.id)
       .populate("author", "username")
-      .populate("image"); // Populate image data
+      .populate("image");
 
     if (!post) {
       return res.status(404).json(`Post with id ${req.params.id} not found`);
@@ -55,12 +55,10 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
-// Helper function to upload image to GridFS
 const uploadImageToGridFS = async (
   file: Express.Multer.File,
   userId: string
 ): Promise<Types.ObjectId> => {
-  // Create a readable stream from the buffer
   const readableStream = new Readable();
   readableStream.push(file.buffer);
   readableStream.push(null);
@@ -77,36 +75,41 @@ const uploadImageToGridFS = async (
       },
     });
 
-    // Pipe file buffer to GridFS
     readableStream.pipe(uploadStream);
 
     uploadStream.on("error", (error) => {
       reject(error);
     });
 
-    uploadStream.on("finish", async (file) => {
-      try {
-        // Create an image document in our ImageModel
-        const image = new ImageModel({
-          filename: file.filename,
-          contentType: file.contentType,
-          size: file.length,
-          fileId: file._id,
-          metadata: {
-            uploadedBy: new Types.ObjectId(userId),
-            originalName: file.filename,
-          },
-          posts: [], // Will add the post reference later
-        });
+    uploadStream.on(
+      "finish",
+      async (file: {
+        filename: any;
+        contentType: any;
+        length: any;
+        _id: ObjectId;
+      }) => {
+        try {
+          const image = new ImageModel({
+            filename: file.filename,
+            contentType: file.contentType,
+            size: file.length,
+            fileId: file._id,
+            metadata: {
+              uploadedBy: new Types.ObjectId(userId),
+              originalName: file.filename,
+            },
+            posts: [],
+          });
 
-        await image.save();
-        resolve(image._id);
-      } catch (err) {
-        // If metadata save fails, delete the GridFS file
-        bucket.delete(file._id).catch(console.error);
-        reject(err);
+          await image.save();
+          resolve(image._id);
+        } catch (err) {
+          bucket.delete(new ObjectId(file._id.toString())).catch(console.error);
+          reject(err);
+        }
       }
-    });
+    );
   });
 };
 
@@ -125,7 +128,6 @@ const createPost = async (req: Request, res: Response) => {
     const userId = req.session!.id;
     let imageId = undefined;
 
-    // If there's an image file, upload it to GridFS
     if (req.file) {
       try {
         imageId = await uploadImageToGridFS(req.file, userId);
@@ -135,7 +137,6 @@ const createPost = async (req: Request, res: Response) => {
       }
     }
 
-    // Create the post with image reference if available
     const post = new PostModel({
       title,
       content,
@@ -145,23 +146,18 @@ const createPost = async (req: Request, res: Response) => {
 
     await post.save();
 
-    // If we have an image, update it to reference this post
     if (imageId) {
       await ImageModel.findByIdAndUpdate(imageId, {
         $push: { posts: post._id },
       });
     }
 
-    // For test compatibility, convert to a plain object
-    // This ensures we don't have Mongoose document methods causing issues
     const postObject = post.toObject();
 
-    // Make sure author is just the ObjectId for the test
     if (postObject.author) {
       postObject.author = post.author;
     }
 
-    // Return the plain object
     res.status(201).json(postObject);
   } catch (error) {
     console.error("Error creating post:", error);
@@ -178,12 +174,10 @@ const updatePost = async (req: Request, res: Response) => {
     const postId = req.params.id;
     const userId = req.session!.id;
 
-    // Check if any data was provided for the update
     if (Object.keys(req.body).length === 0 && !req.file) {
       return res.status(400).json("No update data provided");
     }
 
-    // Find the post to update
     const post = await PostModel.findById(postId);
 
     if (!post) {
@@ -192,9 +186,7 @@ const updatePost = async (req: Request, res: Response) => {
 
     const updateData: any = {};
 
-    // Handle different content types
     if (isFormData) {
-      // For form data (used when uploading images)
       if (title !== undefined) {
         if (typeof title !== "string" || title.trim() === "") {
           return res.status(400).json("Invalid title");
@@ -209,8 +201,6 @@ const updatePost = async (req: Request, res: Response) => {
         updateData.content = content;
       }
     } else {
-      // For JSON data (used in API tests)
-      // Check for required fields in non-form submissions
       for (const field of ["title", "content", "author"]) {
         if (!req.body.hasOwnProperty(field)) {
           return res.status(400).json(`Missing ${field}`);
@@ -250,14 +240,11 @@ const updatePost = async (req: Request, res: Response) => {
       updateData.author = req.body.author;
     }
 
-    // Handle image upload for both content types
     if (req.file) {
       try {
-        // Upload new image to GridFS
         const newImageId = await uploadImageToGridFS(req.file, userId);
         updateData.image = newImageId;
 
-        // If post already had an image, remove the post reference from that image
         if (post.image) {
           const oldImage = await ImageModel.findById(post.image);
           if (oldImage) {
@@ -265,16 +252,14 @@ const updatePost = async (req: Request, res: Response) => {
               post._id
             );
 
-            // If true is returned, delete the old image as it's no longer referenced
             if (shouldDeleteImage) {
               const bucket = getImageBucket();
-              await bucket.delete(oldImage.fileId);
+              await bucket.delete(new ObjectId(oldImage.fileId.toString()));
               await ImageModel.findByIdAndDelete(oldImage._id);
             }
           }
         }
 
-        // Update the new image to reference this post
         await ImageModel.findByIdAndUpdate(newImageId, {
           $push: { posts: post._id },
         });
@@ -283,29 +268,24 @@ const updatePost = async (req: Request, res: Response) => {
         return res.status(500).json("Error uploading image");
       }
     } else if (req.body.removeImage === "true" && post.image) {
-      // Handle image removal without replacement
       const oldImage = await ImageModel.findById(post.image);
       if (oldImage) {
         const shouldDeleteImage = await oldImage.removePostReference(post._id);
 
-        // If true is returned, delete the old image as it's no longer referenced
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(oldImage.fileId);
+          await bucket.delete(new ObjectId(oldImage.fileId.toString()));
           await ImageModel.findByIdAndDelete(oldImage._id);
         }
       }
 
-      // Remove the image reference from the post
       updateData.image = null;
     }
 
-    // Check if there's nothing to update after validation
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json("No valid fields to update");
     }
 
-    // Update the post
     const updatedPost = await PostModel.findByIdAndUpdate(postId, updateData, {
       new: true,
       runValidators: true,
@@ -321,7 +301,6 @@ const updatePost = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Update post error:", error);
 
-    // Better error handling
     const errorMsg = (error as Error).message.toLowerCase();
 
     if (errorMsg.includes("title")) {
@@ -340,29 +319,25 @@ const deletePost = async (req: Request, res: Response) => {
   try {
     const postId = req.params.id;
 
-    // Find the post to delete
     const post = await PostModel.findById(postId);
 
     if (!post) {
       return res.status(404).json(`Post with id ${postId} not found`);
     }
 
-    // If post has an image, remove the post reference from that image
     if (post.image) {
       const image = await ImageModel.findById(post.image);
       if (image) {
         const shouldDeleteImage = await image.removePostReference(post._id);
 
-        // If true is returned, delete the image as it's no longer referenced
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(image.fileId);
+          await bucket.delete(new ObjectId(image.fileId.toString()));
           await ImageModel.findByIdAndDelete(image._id);
         }
       }
     }
 
-    // Delete the post
     await PostModel.findByIdAndDelete(postId);
 
     res.status(204).end();

@@ -32,7 +32,9 @@ imageSchema.methods.addPostReference = async function (postId: Types.ObjectId) {
 imageSchema.methods.removePostReference = async function (
   postId: Types.ObjectId
 ) {
-  this.posts = this.posts.filter((id) => !id.equals(postId));
+  this.posts = this.posts.filter(
+    (id: { equals: (arg0: Types.ObjectId) => any }) => !id.equals(postId)
+  );
 
   if (this.posts.length === 0) {
     return true;

@@ -5,6 +5,7 @@ import { Readable } from "stream";
 import { getImageBucket } from "../utils/gridfs-config";
 import { ImageModel } from "./image-model";
 import { isAuthenticated, isAdmin } from "../middlewares";
+import { ObjectId } from "bson";
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -70,38 +71,46 @@ imageRouter.post(
           reject(error);
         });
 
-        uploadStream.on("finish", async (file) => {
-          try {
-            const image = new ImageModel({
-              filename: file.filename,
-              contentType: file.contentType,
-              size: file.length,
-              fileId: file._id,
-              metadata: {
-                uploadedBy: userId,
-                originalName: req.file?.originalname,
-              },
-              posts: [],
-            });
+        uploadStream.on(
+          "finish",
+          async (file: {
+            filename: any;
+            contentType: any;
+            length: any;
+            _id: ObjectId;
+          }) => {
+            try {
+              const image = new ImageModel({
+                filename: file.filename,
+                contentType: file.contentType,
+                size: file.length,
+                fileId: file._id,
+                metadata: {
+                  uploadedBy: userId,
+                  originalName: req.file?.originalname,
+                },
+                posts: [],
+              });
 
-            await image.save();
+              await image.save();
 
-            res.status(201).json({
-              success: true,
-              image: image.toObject(),
-            });
-            resolve();
-          } catch (err) {
-            console.error("Failed to save image metadata:", err);
-            bucket.delete(file._id).catch((deleteErr) => {
-              console.error(
-                "Failed to delete GridFS file after metadata save error:",
-                deleteErr
-              );
-            });
-            reject(err);
+              res.status(201).json({
+                success: true,
+                image: image.toObject(),
+              });
+              resolve();
+            } catch (err) {
+              console.error("Failed to save image metadata:", err);
+              bucket.delete(file._id).catch((deleteErr) => {
+                console.error(
+                  "Failed to delete GridFS file after metadata save error:",
+                  deleteErr
+                );
+              });
+              reject(err);
+            }
           }
-        });
+        );
       });
     } catch (error) {
       console.error("Image upload error:", error);
@@ -131,11 +140,13 @@ imageRouter.get("/:id", async (req: Request, res: Response) => {
     res.set("Cache-Control", "public, max-age=31536000");
     res.set(
       "Content-Disposition",
-      `inline; filename="${image.metadata.originalName || image.filename}"`
+      `inline; filename="${image.metadata?.originalName || image.filename}"`
     );
 
     const bucket = getImageBucket();
-    const downloadStream = bucket.openDownloadStream(image.fileId);
+    const downloadStream = bucket.openDownloadStream(
+      new ObjectId(image.fileId.toString())
+    );
 
     downloadStream.on("error", (error) => {
       console.error("Error streaming image:", error);
@@ -201,7 +212,7 @@ imageRouter.delete(
       }
 
       const isOwner =
-        image.metadata.uploadedBy.toString() === req.session!.userId;
+        image.metadata?.uploadedBy?.toString() === req.session!.userId;
       const isUserAdmin = req.session!.isAdmin;
 
       if (!isOwner && !isUserAdmin) {
@@ -220,7 +231,7 @@ imageRouter.delete(
       }
 
       const bucket = getImageBucket();
-      await bucket.delete(image.fileId);
+      await bucket.delete(new ObjectId(image.fileId.toString()));
 
       await ImageModel.findByIdAndDelete(imageId);
 
