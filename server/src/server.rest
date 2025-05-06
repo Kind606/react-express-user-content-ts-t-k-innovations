@@ -90,7 +90,7 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Update a post with a new image
-PUT http://localhost:3000/api/posts/680f5ee935de2b13fef6d811
+PUT http://localhost:3000/api/posts/681a303a91e01734fd813409
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW

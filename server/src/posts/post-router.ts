@@ -79,7 +79,7 @@ const createPost = async (req: Request, res: Response) => {
       return res.status(400).json("Invalid content");
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const imageUrl = req.file ? `/api/uploads/${req.file.filename}` : undefined;
 
     const post = new PostModel({
       title,
@@ -125,7 +125,7 @@ const updatePost = async (req: Request, res: Response) => {
       }
 
       if (req.file) {
-        updateData.image = `/uploads/${req.file.filename}`;
+        updateData.image = `/api/uploads/${req.file.filename}`;
       }
     } else {
       for (const field of ["title", "content", "author"]) {
