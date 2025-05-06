@@ -67,6 +67,15 @@ const CreatePostPage = () => {
     createPostMutation.mutate(formData);
   };
 
+  const removeImagePreview = () => {
+    setImagePreview(null);
+    setImage(null);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -134,8 +143,17 @@ const CreatePostPage = () => {
                 alt="Preview"
                 style={{ maxWidth: "100%", maxHeight: "200px" }}
               />
+
             </Box>
           )}
+           <Button
+                variant="outlined"
+                color="primary"
+                sx={{ marginTop: 2 }}
+                onClick={removeImagePreview}
+              >
+                Remove Image Preview
+              </Button>
         </Box>
         <Button
           type="submit"
