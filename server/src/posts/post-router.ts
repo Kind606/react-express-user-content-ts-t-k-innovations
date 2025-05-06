@@ -6,8 +6,6 @@ import multer from "multer";
 import { Readable } from "stream";
 import { ImageModel } from "../images/image-model";
 import { getImageBucket } from "../utils/gridfs-config";
-import fs from "fs";
-import path from "path";
 
 // Configure multer for memory storage instead of disk storage
 const storage = multer.memoryStorage();
