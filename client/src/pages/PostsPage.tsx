@@ -50,7 +50,7 @@ const PostsPage = () => {
       {posts && posts.length > 0 ? (
         <Grid container spacing={3}>
           {posts.map((post: Post) => (
-            <Grid item xs={12} sm={6} md={4} key={post._id}>
+            <Grid key={post._id}>
               <PostCard post={post} />
             </Grid>
           ))}
