@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getPostById, updatePost } from "../services/postService";
+import { getImageUrl } from "../services/imageService";
+import { ImageResponse } from "../types/Image";
 
 const EditPostPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,8 +42,17 @@ const EditPostPage = () => {
     if (post) {
       setTitle(post.title);
       setContent(post.content);
+
       if (post.image) {
-        setImagePreview(post.image);
+        let imageId: string;
+
+        if (typeof post.image === "string") {
+          imageId = post.image;
+        } else {
+          imageId = (post.image as ImageResponse)._id;
+        }
+
+        setImagePreview(getImageUrl(imageId));
       }
     }
   }, [post]);
@@ -103,8 +114,8 @@ const EditPostPage = () => {
 
     if (image) {
       formData.append("image", image);
-    } else if (post?.image && keepExistingImage) {
-      formData.append("keepExistingImage", "true");
+    } else if (!keepExistingImage && post?.image) {
+      formData.append("removeImage", "true");
     }
 
     updatePostMutation.mutate(formData);
@@ -218,10 +229,9 @@ const EditPostPage = () => {
           variant="contained"
           color="primary"
           fullWidth
-        
           sx={{ marginBottom: 2 }}
         >
-         Update Post
+          Update Post
         </Button>
       </form>
     </Box>

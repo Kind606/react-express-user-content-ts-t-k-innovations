@@ -3,38 +3,25 @@ import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
 import { PostModel } from "./post-model";
 import { Types } from "mongoose";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { Readable } from "stream";
+import { ImageModel } from "../images/image-model";
+import { getImageBucket } from "../utils/gridfs-config";
+import { ObjectId } from "bson";
 
-const uploadDir = path.join(__dirname, "../../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({
-  storage: storage,
+  storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
     const mimetype = allowedTypes.test(file.mimetype);
+    const extname = allowedTypes.test(
+      file.originalname.toLowerCase().split(".").pop() || ""
+    );
 
-    if (extname && mimetype) {
+    if (mimetype && extname) {
       return cb(null, true);
     } else {
       cb(new Error("Only image files are allowed!"));
@@ -44,7 +31,9 @@ const upload = multer({
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const posts = await PostModel.find({}).populate("author", "username");
+    const posts = await PostModel.find({})
+      .populate("author", "username")
+      .populate("image");
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: "Error fetching posts" });
@@ -53,10 +42,9 @@ const getAllPosts = async (req: Request, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
   try {
-    const post = await PostModel.findById(req.params.id).populate(
-      "author",
-      "username"
-    );
+    const post = await PostModel.findById(req.params.id)
+      .populate("author", "username")
+      .populate("image");
 
     if (!post) {
       return res.status(404).json(`Post with id ${req.params.id} not found`);
@@ -65,6 +53,64 @@ const getPostById = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json("Error fetching post");
   }
+};
+
+const uploadImageToGridFS = async (
+  file: Express.Multer.File,
+  userId: string
+): Promise<Types.ObjectId> => {
+  const readableStream = new Readable();
+  readableStream.push(file.buffer);
+  readableStream.push(null);
+
+  const bucket = getImageBucket();
+  const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`;
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = bucket.openUploadStream(filename, {
+      contentType: file.mimetype,
+      metadata: {
+        uploadedBy: new Types.ObjectId(userId),
+        originalName: file.originalname,
+      },
+    });
+
+    readableStream.pipe(uploadStream);
+
+    uploadStream.on("error", (error) => {
+      reject(error);
+    });
+
+    uploadStream.on(
+      "finish",
+      async (file: {
+        filename: any;
+        contentType: any;
+        length: any;
+        _id: ObjectId;
+      }) => {
+        try {
+          const image = new ImageModel({
+            filename: file.filename,
+            contentType: file.contentType,
+            size: file.length,
+            fileId: file._id,
+            metadata: {
+              uploadedBy: new Types.ObjectId(userId),
+              originalName: file.filename,
+            },
+            posts: [],
+          });
+
+          await image.save();
+          resolve(image._id);
+        } catch (err) {
+          bucket.delete(new ObjectId(file._id.toString())).catch(console.error);
+          reject(err);
+        }
+      }
+    );
+  });
 };
 
 const createPost = async (req: Request, res: Response) => {
@@ -79,19 +125,42 @@ const createPost = async (req: Request, res: Response) => {
       return res.status(400).json("Invalid content");
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const userId = req.session!.id;
+    let imageId = undefined;
+
+    if (req.file) {
+      try {
+        imageId = await uploadImageToGridFS(req.file, userId);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return res.status(500).json("Error uploading image");
+      }
+    }
 
     const post = new PostModel({
       title,
       content,
-      author: new Types.ObjectId(req.session!.id),
-      image: imageUrl,
+      author: new Types.ObjectId(userId),
+      image: imageId,
     });
 
     await post.save();
 
-    res.status(201).json(post);
+    if (imageId) {
+      await ImageModel.findByIdAndUpdate(imageId, {
+        $push: { posts: post._id },
+      });
+    }
+
+    const postObject = post.toObject();
+
+    if (postObject.author) {
+      postObject.author = post.author;
+    }
+
+    res.status(201).json(postObject);
   } catch (error) {
+    console.error("Error creating post:", error);
     res.status(500).json("Error creating post");
   }
 };
@@ -101,12 +170,20 @@ const updatePost = async (req: Request, res: Response) => {
     const isFormData = req.headers["content-type"]?.includes(
       "multipart/form-data"
     );
+    const { title, content } = req.body;
+    const postId = req.params.id;
+    const userId = req.session!.id;
 
     if (Object.keys(req.body).length === 0 && !req.file) {
       return res.status(400).json("No update data provided");
     }
 
-    const { title, content } = req.body;
+    const post = await PostModel.findById(postId);
+
+    if (!post) {
+      return res.status(404).json(`Post with id ${postId} not found`);
+    }
+
     const updateData: any = {};
 
     if (isFormData) {
@@ -122,10 +199,6 @@ const updatePost = async (req: Request, res: Response) => {
           return res.status(400).json("Invalid content");
         }
         updateData.content = content;
-      }
-
-      if (req.file) {
-        updateData.image = `/uploads/${req.file.filename}`;
       }
     } else {
       for (const field of ["title", "content", "author"]) {
@@ -167,14 +240,61 @@ const updatePost = async (req: Request, res: Response) => {
       updateData.author = req.body.author;
     }
 
-    const updatedPost = await PostModel.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    if (req.file) {
+      try {
+        const newImageId = await uploadImageToGridFS(req.file, userId);
+        updateData.image = newImageId;
+
+        if (post.image) {
+          const oldImage = await ImageModel.findById(post.image);
+          if (oldImage) {
+            const shouldDeleteImage = await oldImage.removePostReference(
+              post._id
+            );
+
+            if (shouldDeleteImage) {
+              const bucket = getImageBucket();
+              await bucket.delete(new ObjectId(oldImage.fileId.toString()));
+              await ImageModel.findByIdAndDelete(oldImage._id);
+            }
+          }
+        }
+
+        await ImageModel.findByIdAndUpdate(newImageId, {
+          $push: { posts: post._id },
+        });
+      } catch (error) {
+        console.error("Error uploading new image:", error);
+        return res.status(500).json("Error uploading image");
+      }
+    } else if (req.body.removeImage === "true" && post.image) {
+      const oldImage = await ImageModel.findById(post.image);
+      if (oldImage) {
+        const shouldDeleteImage = await oldImage.removePostReference(post._id);
+
+        if (shouldDeleteImage) {
+          const bucket = getImageBucket();
+          await bucket.delete(new ObjectId(oldImage.fileId.toString()));
+          await ImageModel.findByIdAndDelete(oldImage._id);
+        }
+      }
+
+      updateData.image = null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json("No valid fields to update");
+    }
+
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, updateData, {
+      new: true,
+      runValidators: true,
+    })
+      .populate("author", "username")
+      .populate("image");
 
     if (!updatedPost) {
-      return res.status(404).json(`Post with id ${req.params.id} not found`);
+      return res.status(404).json(`Post with id ${postId} not found`);
     }
 
     res.status(200).json(updatedPost);
@@ -190,23 +310,39 @@ const updatePost = async (req: Request, res: Response) => {
     } else if (errorMsg.includes("author")) {
       return res.status(400).json("Invalid author");
     } else {
-      return res
-        .status(400)
-        .json("Invalid field values for title, content, or author");
+      return res.status(400).json("Invalid field values");
     }
   }
 };
 
 const deletePost = async (req: Request, res: Response) => {
   try {
-    const deletedPost = await PostModel.findByIdAndDelete(req.params.id);
+    const postId = req.params.id;
 
-    if (!deletedPost) {
-      return res.status(404).json(`Post with id ${req.params.id} not found`);
+    const post = await PostModel.findById(postId);
+
+    if (!post) {
+      return res.status(404).json(`Post with id ${postId} not found`);
     }
+
+    if (post.image) {
+      const image = await ImageModel.findById(post.image);
+      if (image) {
+        const shouldDeleteImage = await image.removePostReference(post._id);
+
+        if (shouldDeleteImage) {
+          const bucket = getImageBucket();
+          await bucket.delete(new ObjectId(image.fileId.toString()));
+          await ImageModel.findByIdAndDelete(image._id);
+        }
+      }
+    }
+
+    await PostModel.findByIdAndDelete(postId);
 
     res.status(204).end();
   } catch (error) {
+    console.error("Delete post error:", error);
     res.status(500).json("Error deleting post");
   }
 };

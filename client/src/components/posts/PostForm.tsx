@@ -29,7 +29,7 @@ const PostForm = ({
     if (initialData) {
       setTitle(initialData.title);
       setContent(initialData.content);
-      if (initialData.image) {
+      if (initialData.image && typeof initialData.image === "string") {
         setImagePreview(initialData.image);
       }
     }
