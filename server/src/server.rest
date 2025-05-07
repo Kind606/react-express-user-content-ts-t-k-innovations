@@ -116,6 +116,9 @@ Content-Type: image/jpeg
 ### 6. Test retrieving a large image (to verify chunking works)
 # Upload a larger image (>255KB) to test chunking
 POST http://localhost:3000/api/images
+
+### Update a post with a new image
+PUT http://localhost:3000/api/posts/681a303a91e01734fd813409
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
