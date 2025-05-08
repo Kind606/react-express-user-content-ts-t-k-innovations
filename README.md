@@ -149,11 +149,20 @@ server/
 │   ├── app.ts              # Express app configuration
 │   ├── server.ts           # Server entry point
 │   ├── middlewares.ts      # Auth middlewares
-│   ├── controllers/        # Request handlers
-│   ├── models/             # Mongoose models
-│   ├── routes/             # API routes
+│   ├── users/              # User model and routes
+│   │   ├── user-model.ts
+│   │   └── user-router.ts
+│   ├── posts/              # Post model and routes
+│   │   ├── post-model.ts
+│   │   └── post-router.ts
+│   ├── images/             # Image model and routes
+│   │   ├── image-model.ts
+│   │   └── image-router.ts
+│   ├── types/              # TypeScript types
+│   │   └── image.ts
 │   └── utils/              # Utility functions
-└── tests/                  # Test files
+│       └── gridfs-config.ts
+└── dist/                   # Compiled JavaScript
 ```
 
 ### Frontend
@@ -162,12 +171,33 @@ server/
 client/
 ├── src/
 │   ├── components/         # UI components
-│   ├── pages/              # Page components
+│   │   ├── auth/           # Authentication components
+│   │   ├── layout/         # Layout components
+│   │   └── posts/          # Post components
 │   ├── context/            # React contexts
-│   ├── services/           # API client services
+│   │   └── AuthContext.tsx
 │   ├── hooks/              # Custom hooks
+│   │   └── useAuth.ts
+│   ├── pages/              # Page components
+│   │   ├── HomePage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── RegisterPage.tsx
+│   │   ├── PostsPage.tsx
+│   │   ├── PostDetailPage.tsx
+│   │   ├── CreatePostPage.tsx
+│   │   ├── EditPostPage.tsx
+│   │   └── AdminPage.tsx
+│   ├── services/           # API client services
+│   │   ├── api.ts
+│   │   ├── authService.ts
+│   │   ├── postService.ts
+│   │   └── imageService.ts
 │   ├── types/              # TypeScript types
-│   └── App.tsx             # Main component
+│   │   ├── User.ts
+│   │   ├── Post.ts
+│   │   └── Image.ts
+│   ├── App.tsx             # Main component
+│   └── main.tsx            # Entry point
 └── public/                 # Static assets
 ```
 
