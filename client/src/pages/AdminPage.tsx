@@ -135,7 +135,8 @@ const AdminPage = () => {
 
   return (
     <Box sx={{ maxWidth: 800, margin: "50px auto", padding: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom
+      sx={{ color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2 }}>
         Admin Dashboard
       </Typography>
       <Typography variant="h6" component="h2" gutterBottom>
@@ -160,17 +161,33 @@ const AdminPage = () => {
                   <Button
                     onClick={() => handleEditClick(user)}
                     variant="outlined"
-                    color="primary"
                     size="small"
-                    sx={{ marginRight: 1 }}
+                    sx={{
+                      marginRight: 1,
+                      color: "#8f7474",
+                      borderColor: "#8f7474",
+                      "&:hover": {
+                        backgroundColor: "#655353",
+                        color: "white",
+                        borderColor: "#655353",
+                      },
+                    }}
                   >
                     Edit
                   </Button>
                   <Button
                     onClick={() => handleDeleteUser(user._id, user.username)}
                     variant="outlined"
-                    color="error"
                     size="small"
+                    sx={{
+                      color: "#8f7474",
+                      borderColor: "#8f7474",
+                      "&:hover": {
+                        backgroundColor: "#655353",
+                        color: "white",
+                        borderColor: "#655353",
+                      },
+                    }}
                   >
                     Delete
                   </Button>
@@ -200,14 +217,28 @@ const AdminPage = () => {
             <Button
               onClick={() => setEditingUser(null)}
               variant="outlined"
-              color="secondary"
+              sx={{
+                color: "#8f7474",
+                borderColor: "#8f7474",
+                "&:hover": {
+                  backgroundColor: "#655353",
+                  color: "white",
+                  borderColor: "#655353",
+                },
+              }}
             >
               Cancel
             </Button>
             <Button
               onClick={submitRoleChange}
               variant="contained"
-              color="primary"
+              sx={{
+                backgroundColor: "#8f7474",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "#655353",
+                },
+              }}
             >
               Save Changes
             </Button>

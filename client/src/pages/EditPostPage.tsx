@@ -153,7 +153,14 @@ const EditPostPage = () => {
         boxShadow: 3,
       }}
     >
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{
+          color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2 
+        }}
+      >
         Edit Post
       </Typography>
 
@@ -171,7 +178,10 @@ const EditPostPage = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          sx={{ marginBottom: 2 }}
+          sx={{
+            marginBottom: 2,
+          
+          }}
         />
         <TextField
           label="Content"
@@ -182,7 +192,10 @@ const EditPostPage = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           required
-          sx={{ marginBottom: 2 }}
+          sx={{
+            marginBottom: 2,
+            
+          }}
         />
         <Box sx={{ marginBottom: 2 }}>
           <Typography variant="body1" gutterBottom>
@@ -227,9 +240,16 @@ const EditPostPage = () => {
         <Button
           type="submit"
           variant="contained"
-          color="primary"
           fullWidth
-          sx={{ marginBottom: 2 }}
+          sx={{
+            marginBottom: 2,
+            backgroundColor: "#8f7474",
+            color: "white",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "#655353",
+            },
+          }}
         >
           Update Post
         </Button>

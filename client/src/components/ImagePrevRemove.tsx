@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 interface ImagePrevRemoveProps {
   setImagePreview: (value: string | null) => void;
   setImage: (value: File | null) => void;
-  setKeepExistingImage?: (value: boolean) => void; 
+  setKeepExistingImage?: (value: boolean) => void;
 }
 
 function ImagePrevRemove({
@@ -31,8 +31,7 @@ function ImagePrevRemove({
   return (
     <Button
       variant="outlined"
-      color="primary"
-      sx={{ marginTop: 2 }}
+      sx={{ marginTop: 2, backgroundColor: "#8f7474", color: "white" }}
       onClick={removeImagePreview}
     >
       Remove Image Preview

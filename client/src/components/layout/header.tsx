@@ -13,6 +13,7 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu"; 
 import { useAuth } from "../../hooks/useAuth";
 
 const Header = () => {
@@ -62,26 +63,29 @@ const Header = () => {
   );
 
   return (
-    <AppBar position="static" color="primary">
+    <AppBar position="static">
       <Toolbar
         sx={{
+          backgroundColor: "#8f7474",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        {/* Logo */}
+       
         <Typography
           variant="h6"
           component={Link}
           to="/"
           sx={{
+            fontFamily: "monospace",
+            fontSize: "2rem",
             textDecoration: "none",
             color: "inherit",
             fontWeight: "bold",
           }}
         >
-          Content Platform
+          T&K Innovations
         </Typography>
 
         {/* Responsive Navigation */}
@@ -95,7 +99,7 @@ const Header = () => {
                 fontWeight: "bold",
               }}
             >
-              Menu
+              <MenuIcon />
             </Button>
             <Drawer
               anchor="right"
@@ -109,29 +113,29 @@ const Header = () => {
                 onKeyDown={toggleDrawer(false)}
               >
                 <List>
-                  <ListItem  component={Link} to="/">
+                  <ListItem component={Link} to="/">
                     <ListItemText primary="Home" />
                   </ListItem>
                   {user ? (
                     <>
-                      <ListItem  component={Link} to="/create-post">
+                      <ListItem component={Link} to="/create-post">
                         <ListItemText primary="Create Post" />
                       </ListItem>
                       {user.isAdmin && (
-                        <ListItem  component={Link} to="/admin">
+                        <ListItem component={Link} to="/admin">
                           <ListItemText primary="Admin" />
                         </ListItem>
                       )}
-                      <ListItem  onClick={handleLogout}>
+                      <ListItem onClick={handleLogout}>
                         <ListItemText primary="Logout" />
                       </ListItem>
                     </>
                   ) : (
                     <>
-                      <ListItem  component={Link} to="/login">
+                      <ListItem component={Link} to="/login">
                         <ListItemText primary="Login" />
                       </ListItem>
-                      <ListItem  component={Link} to="/register">
+                      <ListItem component={Link} to="/register">
                         <ListItemText primary="Register" />
                       </ListItem>
                     </>

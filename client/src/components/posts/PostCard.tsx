@@ -42,10 +42,15 @@ export const PostCard = ({ post }: PostCardProps) => {
   return (
     <Card
       sx={{
-        maxWidth: 345,
+        maxWidth: 500,
         margin: "16px auto",
-        borderRadius: 2,
+        borderRadius: 0,
         overflow: "hidden",
+        ":hover": {
+          boxShadow: 20,
+          transform: "scale(1.02)",
+          transition: "transform 0.2s ease-in-out",
+        },
       }}
     >
       <CardHeader
@@ -59,18 +64,32 @@ export const PostCard = ({ post }: PostCardProps) => {
             <MoreVertIcon />
           </IconButton>
         }
-        title={post.title}
+       
         subheader={`By: ${authorName}`}
       />
       {imageUrl && (
         <CardMedia
           component="img"
           height="194"
+          sx={{
+            position: "relative",
+          }}
           image={imageUrl}
           alt={post.title}
         />
       )}
       <CardContent>
+        {/* Add the post title */}
+        <Typography
+          variant="h6"
+          component="h2"
+          sx={{
+            fontWeight: "bold",
+            marginBottom: 1,
+          }}
+        >
+          {post.title}
+        </Typography>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {post.content.length > 100
             ? `${post.content.substring(0, 100)}...`
@@ -90,6 +109,17 @@ export const PostCard = ({ post }: PostCardProps) => {
             to={`/posts/${post._id}`}
             variant="outlined"
             size="small"
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              color: "#8f7474",
+              borderColor: "#8f7474",
+              "&:hover": {
+                backgroundColor: "#655353",
+                color: "white",
+                borderColor: "##655353",
+              },
+            }}
           >
             Read More
           </Button>
