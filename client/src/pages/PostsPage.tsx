@@ -58,9 +58,13 @@ const PostsPage = () => {
         />
       </Box>
       <Container sx={{ marginTop: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Posts
-        </Typography>
+          <Box sx={ {color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2}}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Posts
+            </Typography>
+          </Box>
+
+          
         {posts && posts.length > 0 ? (
           <Grid container spacing={3}>
             {posts.map((post: Post) => (
