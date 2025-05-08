@@ -200,7 +200,7 @@ imageRouter.delete(
       }
 
       const isOwner =
-        image.metadata?.uploadedBy?.toString() === req.session!.userId;
+        image.metadata?.uploadedBy?.toString() === req.session!.id;
       const isUserAdmin = req.session!.isAdmin;
 
       if (!isOwner && !isUserAdmin) {
