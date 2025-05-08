@@ -46,11 +46,6 @@ export const PostCard = ({ post }: PostCardProps) => {
         margin: "16px auto",
         borderRadius: 0,
         overflow: "hidden",
-        ":hover": {
-          boxShadow: 20,
-          transform: "scale(1.02)",
-          transition: "transform 0.2s ease-in-out",
-        },
       }}
     >
       <CardHeader

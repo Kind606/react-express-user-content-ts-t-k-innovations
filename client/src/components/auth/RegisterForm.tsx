@@ -52,7 +52,7 @@ const RegisterForm = () => {
         flexDirection: "column",
         gap: 2,
         boxShadow: 3,
-        borderRadius: 2,
+       
         backgroundColor: "#f9f9f9",
         border: "1px solid #ddd",
       }}
