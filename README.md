@@ -21,24 +21,25 @@ This project is a content platform where users can register, login, and create p
 - MongoDB with Mongoose
 - Authentication via cookie-session
 - Password encryption with argon2
-- File uploads using Busboy
-- GridFS for image storage
+- File uploads using Multer
+- MongoDB GridFS for image storage
 
 ### Frontend
 
 - React 19+ with TypeScript
-- React Router for navigation
-- TanStack Query for data fetching
+- React Router v7+ for navigation
+- TanStack Query (React Query) for data fetching
 - Context API for state management
-- Responsive design
+- Material UI v7+ for UI components
 
 ## Features
 
 - **User Authentication**: Register and login securely
 - **Content Management**: Create, read, update, and delete posts
-- **Image Upload**: Support for jpg, png, and webp images
+- **Image Upload**: Support for jpeg, jpg, png, gif, and webp images
+- **GridFS Storage**: Efficient storage and retrieval of images
 - **Authorization**: Owner-based access control for content
-- **Admin Dashboard**: User management and content moderation
+- **Admin Dashboard**: User management and role editing
 - **Responsive Design**: Works on mobile and desktop
 
 ## Getting Started
