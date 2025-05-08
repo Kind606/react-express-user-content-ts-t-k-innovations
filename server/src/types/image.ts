@@ -18,9 +18,3 @@ export interface ImageResponse {
   createdAt: Date;
   updatedAt: Date;
 }
-
-export interface UploadImageResponse {
-  success: boolean;
-  image?: ImageResponse;
-  error?: string;
-}
