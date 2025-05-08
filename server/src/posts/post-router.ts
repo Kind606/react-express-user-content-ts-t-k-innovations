@@ -132,7 +132,6 @@ const createPost = async (req: Request, res: Response) => {
       try {
         imageId = await uploadImageToGridFS(req.file, userId);
       } catch (error) {
-        console.error("Error uploading image:", error);
         return res.status(500).json("Error uploading image");
       }
     }
@@ -160,7 +159,6 @@ const createPost = async (req: Request, res: Response) => {
 
     res.status(201).json(postObject);
   } catch (error) {
-    console.error("Error creating post:", error);
     res.status(500).json("Error creating post");
   }
 };
@@ -264,7 +262,6 @@ const updatePost = async (req: Request, res: Response) => {
           $push: { posts: post._id },
         });
       } catch (error) {
-        console.error("Error uploading new image:", error);
         return res.status(500).json("Error uploading image");
       }
     } else if (req.body.removeImage === "true" && post.image) {
@@ -299,8 +296,6 @@ const updatePost = async (req: Request, res: Response) => {
 
     res.status(200).json(updatedPost);
   } catch (error) {
-    console.error("Update post error:", error);
-
     const errorMsg = (error as Error).message.toLowerCase();
 
     if (errorMsg.includes("title")) {
@@ -342,7 +337,6 @@ const deletePost = async (req: Request, res: Response) => {
 
     res.status(204).end();
   } catch (error) {
-    console.error("Delete post error:", error);
     res.status(500).json("Error deleting post");
   }
 };

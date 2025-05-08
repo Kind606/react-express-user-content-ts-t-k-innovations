@@ -1,8 +1,6 @@
 import api from "./api";
 import { User } from "../types/User";
 
-export const getPosts = () => api.get("/posts");
-
 export const login = async (
   username: string,
   password: string

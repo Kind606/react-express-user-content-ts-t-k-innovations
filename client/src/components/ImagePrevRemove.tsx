@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 interface ImagePrevRemoveProps {
   setImagePreview: (value: string | null) => void;
   setImage: (value: File | null) => void;
-  setKeepExistingImage?: (value: boolean) => void; 
+  setKeepExistingImage?: (value: boolean) => void;
 }
 
 function ImagePrevRemove({

@@ -1,7 +1,6 @@
 import { Box, CircularProgress } from "@mui/material";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminPage from "./pages/AdminPage";
 import CreatePostPage from "./pages/CreatePostPage";
@@ -50,11 +49,7 @@ function App() {
     );
   }
 
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

@@ -3,23 +3,15 @@ import { GridFSBucket } from "mongodb";
 
 let imageBucket: GridFSBucket;
 
-export const initializeGridFS = (): GridFSBucket => {
-  if (!mongoose.connection.db) {
-    throw new Error("Database connection not established");
-  }
-
+export function initializeGridFS() {
   imageBucket = new GridFSBucket(mongoose.connection.db, {
     bucketName: "images",
     chunkSizeBytes: 1024 * 255,
   });
 
-  console.log("GridFS bucket initialized for images");
   return imageBucket;
-};
+}
 
-export const getImageBucket = (): GridFSBucket => {
-  if (!imageBucket) {
-    return initializeGridFS();
-  }
-  return imageBucket;
-};
+export function getImageBucket(): GridFSBucket {
+  return imageBucket ?? initializeGridFS();
+}
