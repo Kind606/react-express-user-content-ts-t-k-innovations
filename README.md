@@ -201,6 +201,28 @@ client/
 └── public/                 # Static assets
 ```
 
+## Requirements for Pass grade:
+
+- [x] Git & GitHub have been used
+- [x] Project folder contains a README.md file (read above for more info)
+- [x] Assignment submitted on time!
+- [x] There must be at least two resources (users & posts)
+- [x] It must be possible to register, log in and create content linked to the logged-in user
+- [x] Only the logged-in user is allowed to perform C_UD actions on their content
+- [x] Content must be visible to all visitors to the site
+- [x] The project must support uploading and displaying images as part of the content
+- [x] All content must be saved in a MongoDB database
+
+_Completed requirements have been checked_
+
+## Requirements for Pass with Distinction:
+
+- [x] All requirements for Pass grade are fulfilled
+- [x] There must be an admin role in the system where a logged-in admin has the right to perform CRUD operations on all content
+- [x] Admins should have access to an interface that lists all users and their roles. An admin should be able to remove users or change their role from the interface
+
+_Completed requirements have been checked_
+
 ## Contributing
 
 1. Fork the repository
