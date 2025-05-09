@@ -2,7 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  CardMedia,
   CircularProgress,
   Typography,
 } from "@mui/material";
@@ -10,8 +9,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { deletePost, getPostById } from "../services/postService";
 import { getImageUrl } from "../services/imageService";
+import { deletePost, getPostById } from "../services/postService";
 import { ImageResponse } from "../types/Image";
 
 const PostDetailPage = () => {
@@ -94,63 +93,115 @@ const PostDetailPage = () => {
   const imageUrl = getImageSrc();
 
   return (
-    <Box
-      sx={{
-        maxWidth: 800,
-        margin: "50px auto",
-        padding: 3,
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#fff",
-      }}
-    >
-      <Typography variant="h4" component="h1" gutterBottom>
-        {post.title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        By:{" "}
-        {typeof post.author === "string" ? post.author : post.author.username}
-      </Typography>
-
+    <Box>
+      {/* Full-width image with Back to Posts button */}
       {imageUrl && (
-        <CardMedia
-          component="img"
-          height="300"
-          image={imageUrl}
-          alt={post.title}
-          sx={{ marginBottom: 2, borderRadius: 1 }}
-        />
-      )}
-
-      <Typography variant="body1" paragraph>
-        {post.content}
-      </Typography>
-
-      {canModify && (
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: "80vh",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={imageUrl}
+            alt={post.title}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
           <Button
             component={Link}
-            to={`/posts/${post._id}/edit`}
+            to="/posts"
             variant="contained"
-            color="primary"
+            sx={{
+              position: "absolute",
+              bottom: "20px",
+              left: "5%",
+              backgroundColor: "#8f7474",
+              color: "white",
+              fontWeight: "bold",
+              padding: "10px 20px",
+              boxShadow: 3,
+              "&:hover": {
+                backgroundColor: "#655353",
+              },
+            }}
           >
-            Edit Post
-          </Button>
-          <Button
-            onClick={handleDelete}
-            variant="outlined"
-            color="error"
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete Post"}
+            Back to Posts
           </Button>
         </Box>
       )}
 
-      <Box sx={{ textAlign: "center", marginTop: 4 }}>
-        <Button component={Link} to="/posts" variant="text">
-          Back to Posts
-        </Button>
+      {/* Post content */}
+      <Box
+        sx={{
+          maxWidth: 1000,
+          margin: "20px auto",
+          padding: 3,
+          backgroundColor: "#fff",
+          boxShadow: 3,
+         
+        }}
+      >
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{
+            color: "#8f7474",
+            borderBottom: "2px solid #8f7474",
+            paddingBottom: 2,
+          }}
+        >
+          {post.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          By:{" "}
+          {typeof post.author === "string" ? post.author : post.author.username}
+        </Typography>
+
+        <Typography variant="body1" paragraph>
+          {post.content}
+        </Typography>
+
+        {canModify && (
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <Button
+              component={Link}
+              to={`/posts/${post._id}/edit`}
+              variant="contained"
+              sx={{
+                backgroundColor: "#8f7474",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "#655353",
+                },
+              }}
+            >
+              Edit Post
+            </Button>
+            <Button
+              onClick={handleDelete}
+              variant="outlined"
+              sx={{
+                color: "#8f7474",
+                borderColor: "#8f7474",
+                "&:hover": {
+                  backgroundColor: "#655353",
+                  color: "white",
+                  borderColor: "#655353",
+                },
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Post"}
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );

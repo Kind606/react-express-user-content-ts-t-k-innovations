@@ -2,9 +2,9 @@ import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ImagePrevRemove from "../components/ImagePrevRemove";
 import { useAuth } from "../hooks/useAuth";
 import { createPost } from "../services/postService";
-import ImagePrevRemove from "../components/ImagePrevRemove";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
@@ -75,11 +75,11 @@ const CreatePostPage = () => {
         margin: "50px auto",
         padding: 3,
         backgroundColor: "#f9f9f9",
-        borderRadius: 2,
-        boxShadow: 3,
+    
       }}
     >
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom
+        sx={{ color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2  }}>
         Create New Post
       </Typography>
 
@@ -145,9 +145,15 @@ const CreatePostPage = () => {
         <Button
           type="submit"
           variant="contained"
-          color="primary"
           fullWidth
-          sx={{ marginBottom: 2 }}
+          sx={{
+            marginBottom: 2,
+            backgroundColor: "#8f7474",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#655353",
+            },
+          }}
           disabled={createPostMutation.isPending}
         >
           {createPostMutation.isPending ? "Creating..." : "Create Post"}

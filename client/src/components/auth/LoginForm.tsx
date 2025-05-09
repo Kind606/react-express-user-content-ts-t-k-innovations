@@ -33,11 +33,23 @@ function LoginForm() {
         flexDirection: "column",
         gap: 2,
         boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#fff",
+        backgroundColor: "#f9f9f9",
+        border: "1px solid #ddd",
       }}
     >
-      <Typography variant="h4" component="h1" textAlign="center" gutterBottom>
+      <Typography
+        variant="h4"
+        component="h1"
+        textAlign="center"
+        gutterBottom
+        sx={{
+          backgroundColor: "#8f7474",
+          color: "white",
+          padding: 2,
+          borderRadius: 1,
+          fontWeight: "bold",
+        }}
+      >
         Login
       </Typography>
       {error && <Alert severity="error">{error}</Alert>}
@@ -48,6 +60,7 @@ function LoginForm() {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        
       />
       <TextField
         label="Password"
@@ -57,15 +70,32 @@ function LoginForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
+     
       />
-      <Button type="submit" variant="contained" color="primary" fullWidth>
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: "#8f7474",
+          color: "white",
+          fontWeight: "bold",
+          "&:hover": {
+            backgroundColor: "#655353",
+          },
+        }}
+      >
         Login
       </Button>
       <Typography variant="body2" textAlign="center" sx={{ marginTop: 2 }}>
         Don't have an account?{" "}
         <Link
           to="/register"
-          style={{ textDecoration: "none", color: "#1976d2" }}
+          style={{
+            textDecoration: "none",
+            color: "#8f7474",
+            fontWeight: "bold",
+          }}
         >
           Register
         </Link>
