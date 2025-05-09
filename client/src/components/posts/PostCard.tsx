@@ -42,7 +42,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   return (
     <Card
       sx={{
-        maxWidth: 500,
+        maxWidth: 345,
         margin: "16px auto",
         borderRadius: 0,
         overflow: "hidden",

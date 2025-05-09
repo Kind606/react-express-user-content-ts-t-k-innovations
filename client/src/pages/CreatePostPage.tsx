@@ -75,8 +75,7 @@ const CreatePostPage = () => {
         margin: "50px auto",
         padding: 3,
         backgroundColor: "#f9f9f9",
-        borderRadius: 2,
-        boxShadow: 3,
+    
       }}
     >
       <Typography variant="h4" component="h1" gutterBottom

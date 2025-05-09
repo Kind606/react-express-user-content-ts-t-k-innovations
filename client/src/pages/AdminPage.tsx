@@ -164,6 +164,7 @@ const AdminPage = () => {
                     size="small"
                     sx={{
                       marginRight: 1,
+                      marginBottom: 1,
                       color: "#8f7474",
                       borderColor: "#8f7474",
                       "&:hover": {
@@ -182,6 +183,7 @@ const AdminPage = () => {
                     sx={{
                       color: "#8f7474",
                       borderColor: "#8f7474",
+                      marginBottom: 1,
                       "&:hover": {
                         backgroundColor: "#655353",
                         color: "white",

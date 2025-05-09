@@ -149,8 +149,7 @@ const EditPostPage = () => {
         margin: "50px auto",
         padding: 3,
         backgroundColor: "#f9f9f9",
-        borderRadius: 2,
-        boxShadow: 3,
+       
       }}
     >
       <Typography
