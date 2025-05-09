@@ -21,24 +21,25 @@ This project is a content platform where users can register, login, and create p
 - MongoDB with Mongoose
 - Authentication via cookie-session
 - Password encryption with argon2
-- File uploads using Busboy
-- GridFS for image storage
+- File uploads using Multer
+- MongoDB GridFS for image storage
 
 ### Frontend
 
 - React 19+ with TypeScript
-- React Router for navigation
-- TanStack Query for data fetching
+- React Router v7+ for navigation
+- TanStack Query (React Query) for data fetching
 - Context API for state management
-- Responsive design
+- Material UI v7+ for UI components
 
 ## Features
 
 - **User Authentication**: Register and login securely
 - **Content Management**: Create, read, update, and delete posts
-- **Image Upload**: Support for jpg, png, and webp images
+- **Image Upload**: Support for jpeg, jpg, png, gif, and webp images
+- **GridFS Storage**: Efficient storage and retrieval of images
 - **Authorization**: Owner-based access control for content
-- **Admin Dashboard**: User management and content moderation
+- **Admin Dashboard**: User management and role editing
 - **Responsive Design**: Works on mobile and desktop
 
 ## Getting Started
@@ -148,11 +149,20 @@ server/
 │   ├── app.ts              # Express app configuration
 │   ├── server.ts           # Server entry point
 │   ├── middlewares.ts      # Auth middlewares
-│   ├── controllers/        # Request handlers
-│   ├── models/             # Mongoose models
-│   ├── routes/             # API routes
+│   ├── users/              # User model and routes
+│   │   ├── user-model.ts
+│   │   └── user-router.ts
+│   ├── posts/              # Post model and routes
+│   │   ├── post-model.ts
+│   │   └── post-router.ts
+│   ├── images/             # Image model and routes
+│   │   ├── image-model.ts
+│   │   └── image-router.ts
+│   ├── types/              # TypeScript types
+│   │   └── image.ts
 │   └── utils/              # Utility functions
-└── tests/                  # Test files
+│       └── gridfs-config.ts
+└── dist/                   # Compiled JavaScript
 ```
 
 ### Frontend
@@ -161,14 +171,57 @@ server/
 client/
 ├── src/
 │   ├── components/         # UI components
-│   ├── pages/              # Page components
+│   │   ├── auth/           # Authentication components
+│   │   ├── layout/         # Layout components
+│   │   └── posts/          # Post components
 │   ├── context/            # React contexts
-│   ├── services/           # API client services
+│   │   └── AuthContext.tsx
 │   ├── hooks/              # Custom hooks
+│   │   └── useAuth.ts
+│   ├── pages/              # Page components
+│   │   ├── HomePage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── RegisterPage.tsx
+│   │   ├── PostsPage.tsx
+│   │   ├── PostDetailPage.tsx
+│   │   ├── CreatePostPage.tsx
+│   │   ├── EditPostPage.tsx
+│   │   └── AdminPage.tsx
+│   ├── services/           # API client services
+│   │   ├── api.ts
+│   │   ├── authService.ts
+│   │   ├── postService.ts
+│   │   └── imageService.ts
 │   ├── types/              # TypeScript types
-│   └── App.tsx             # Main component
+│   │   ├── User.ts
+│   │   ├── Post.ts
+│   │   └── Image.ts
+│   ├── App.tsx             # Main component
+│   └── main.tsx            # Entry point
 └── public/                 # Static assets
 ```
+
+## Requirements for Pass grade:
+
+- [x] Git & GitHub have been used
+- [x] Project folder contains a README.md file (read above for more info)
+- [x] Assignment submitted on time!
+- [x] There must be at least two resources (users & posts)
+- [x] It must be possible to register, log in and create content linked to the logged-in user
+- [x] Only the logged-in user is allowed to perform C_UD actions on their content
+- [x] Content must be visible to all visitors to the site
+- [x] The project must support uploading and displaying images as part of the content
+- [x] All content must be saved in a MongoDB database
+
+_Completed requirements have been checked_
+
+## Requirements for Pass with Distinction:
+
+- [x] All requirements for Pass grade are fulfilled
+- [x] There must be an admin role in the system where a logged-in admin has the right to perform CRUD operations on all content
+- [x] Admins should have access to an interface that lists all users and their roles. An admin should be able to remove users or change their role from the interface
+
+_Completed requirements have been checked_
 
 ## Contributing
 
@@ -185,76 +238,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Created as a school project at Tomas Maldonis and Kevin Hellgren
-- Built by T & K Innovation
-
-<!-- [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/jg0mE_96)
-
-# User Based Content
-
-## Beskrivning
-
-Ni ska skapa en användarbaserad plattform där en användare har möjligheten att registrera sig, logga in och skapa innehåll (inlägg). Vad för innehåll som användaren kan skapa är valfritt med det ska vara baserat på en resurs i erat Express-API. Användardatan ska även den baseras på en egen resurs (användare), där lösenordet är krypterat. Samtligt innehåll som skapas, förändras eller tas bort ska sparas till en MongoDB databas. Innehållet som en användare skapar får endast lov att ändras eller tas bort av skaparen. Plattformen ska innehålla en klientapplikation där samtliga operationer som nämnts ovan är genomförbara. Dessutom ska innehållet på något sätt presenteras i gränssnittet och vara synligt föra alla - även om man inte är inloggad.
-
-## Kodbas
-
-Den här kodbasen är indelad i en [klientmapp](./client/) och en [servermapp](./server/).
-Servern har två miljöer konfigurerade, en för utveckling och en för testning.
-
-Server-n innehåller några start-filer som kan vara bra att känna till:
-
-- `server.ts` - startfil för utvecklingsmiljön.
-- `app.ts` - innehåller all serverlogik.
-- `index.ts` - exports till testmiljön.
-
-Här är en lista på de olika skripten som kan köras i terminalen.
-
-Navigera först till server mappen -`cd server` och sedan:
-
-- `npm install` - Installerar alla NodeJS moduler (körs en gång).
-- `npm run update` - Uppdaterar testerna och behöver köras om läraren har ändrat dom.
-- `npm run dev` - Startar utvecklingsmiljön.
-- `npm test` - Startar testmiljön så du kan jobba med kravlistan.
-
-Se nedan för den struktur som user & post ska ha. Det är okej att lägga till extra fält men dessa måste då vara valfria så att testerna går igenom.
-
-**User**
-
-- username: string
-- password: string
-- isAdmin: boolean
-
-**Post**
-
-- title: string
-- content: string
-- author: ObjectId
-
-## Bedömning
-
-För att bli godkänd på den här uppgiften MÅSTE ni använda GIT och GitHub. Inlämningen sker som vanligt via läroplattformen där ni lämnar in er projektmapp som en zip-fil. I projektmappen ska det finnas (utöver all kod) en README.md fil som innehåller en titel, beskrivning av uppgiften och vad som krävs för att bygga och starta projektet.
-
-En muntligt presentation ska genomföras per grupp där ni visar vad ni har skapat. Samtlig funktionalitet ska demas och kommer att bockas av och Godkännas under presentationen. Upplägg och innehåll i övrigt är valfritt så länge ni håller er till ämnet. Ca 10-15 min per grupp.
-
-Para ihop er i grupp om två - ni väljer själva vilka ni jobbar med.
-
-**Krav för godkänt:**
-
-- [ ] Git & GitHub har använts
-- [ ] Projektmappen innehåller en README.md fil (läs ovan för mer info)
-- [ ] Uppgiften lämnas in i tid!
-- [ ] Det ska finnas minst två stycken resurser (users & posts)
-- [ ] Det ska gå att registrera sig, logga in och skapa innehåll som är kopplat till inloggad användare.
-- [ ] Endast den inloggade användaren får lov att utföra C_UD actions på sitt innehåll.
-- [ ] Innehållet ska vara synligt för alla besökare på sidan.
-- [ ] Projektet ska ha stöd för att ladda upp och visa bilder som en del av innehållet.
-- [ ] Allt innehåll ska sparas i en MongoDB databas.
-
-_Gjorda krav ska kryssar i_
-
-**Krav för väl godkänt:**
-
-- [ ] Alla punkter för godkänt är uppfyllda
-- [ ] Det ska finnas en adminroll i systemet där man som inloggad admin har rättigheten att utföra CRUD operationer på allt innehåll.
-- [ ] Admins ska ha tillgång till ett gränssnitt som listar alla användare och deras roller. En admin ska från gränssnittet kunna ta bort användare eller ändra dess roll.
-
-_Gjorda krav ska kryssar i_ -->
+- Built by T & K Innovation TM

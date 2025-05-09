@@ -1,9 +1,6 @@
 import api from "./api";
 import { Post } from "../types/Post";
 
-export const login = (username: string, password: string) =>
-  api.post("/users/login", { username, password });
-
 export const getAllPosts = async (): Promise<Post[]> => {
   const response = await api.get("/posts");
   return response.data;
