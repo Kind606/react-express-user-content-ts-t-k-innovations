@@ -144,7 +144,7 @@ const PostDetailPage = () => {
           padding: 3,
           backgroundColor: "#fff",
           boxShadow: 3,
-         
+          borderRadius: 2,
         }}
       >
         <Typography
@@ -164,7 +164,11 @@ const PostDetailPage = () => {
           {typeof post.author === "string" ? post.author : post.author.username}
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        {/* Render content with line breaks */}
+        <Typography
+          variant="body1"
+          sx={{ whiteSpace: "pre-wrap" }} // Preserve line breaks
+        >
           {post.content}
         </Typography>
 
