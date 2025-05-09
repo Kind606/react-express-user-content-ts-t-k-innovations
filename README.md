@@ -238,4 +238,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Created as a school project at Tomas Maldonis and Kevin Hellgren
-- Built by T & K Innovation
+- Built by T & K Innovation TM
