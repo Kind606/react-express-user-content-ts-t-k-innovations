@@ -62,6 +62,13 @@ userRouter.post("/login", async (req, res) => {
   console.log("Session set after login:", req.session);
   console.log("Session before response:", JSON.stringify(req.session));
 
+  // Test if ANY cookie can be set through Railway
+  res.setHeader("Set-Cookie", [
+    "test-cookie=hello; Path=/; Secure; SameSite=None; Max-Age=3600",
+    "another-test=world; Path=/; Secure; SameSite=None; Max-Age=3600",
+  ]);
+  console.log("Test cookies set manually");
+
   res.status(200).json({
     _id: user._id,
     username: user.username,
