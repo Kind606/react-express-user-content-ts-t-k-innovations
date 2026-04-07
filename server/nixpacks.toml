@@ -2,7 +2,21 @@
 nixPkgs = ["nodejs_22"]
 
 [phases.install]
-cmds = ["chmod +x railway-build.sh && bash railway-build.sh"]
+dependsOn = ["setup"]
+cmds = [
+  "echo 'Creating .npmrc for authentication...'",
+  "echo '@plugga-tech:registry=https://npm.pkg.github.com' > .npmrc",
+  "echo '//npm.pkg.github.com/:_authToken='$NPM_TOKEN >> .npmrc",
+  "echo 'Installing all dependencies including dev...'",
+  "npm ci"
+]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = [
+  "echo 'Building TypeScript project...'",
+  "npm run build"
+]
 
 [start]
 cmd = "npm start"
