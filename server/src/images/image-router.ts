@@ -81,12 +81,12 @@ imageRouter.post(
             try {
               const image = new ImageModel({
                 filename: file.filename,
-                contentType: req.file.mimetype,
+                contentType: req.file!.mimetype,
                 size: file.length,
                 fileId: new Types.ObjectId(file._id),
                 metadata: {
                   uploadedBy: userId,
-                  originalName: req.file?.originalname,
+                  originalName: req.file!.originalname,
                 },
                 posts: [],
               });
@@ -131,12 +131,12 @@ imageRouter.get("/:id", async (req: Request, res: Response) => {
     res.set("Cache-Control", "public, max-age=31536000");
     res.set(
       "Content-Disposition",
-      `inline; filename="${image.metadata?.originalName || image.filename}"`,
+      `inline; filename="${(image.metadata as any)?.originalName || image.filename}"`,
     );
 
     const bucket = getImageBucket();
     const downloadStream = bucket.openDownloadStream(
-      new ObjectId(image.fileId.toString()),
+      new ObjectId(image.fileId!.toString()),
     );
 
     downloadStream.on("error", (error) => {
@@ -200,7 +200,7 @@ imageRouter.delete(
       }
 
       const isOwner =
-        image.metadata?.uploadedBy?.toString() === req.session!.id;
+        (image.metadata as any)?.uploadedBy?.toString() === req.session!.id;
       const isUserAdmin = req.session!.isAdmin;
 
       if (!isOwner && !isUserAdmin) {
@@ -219,7 +219,7 @@ imageRouter.delete(
       }
 
       const bucket = getImageBucket();
-      await bucket.delete(new ObjectId(image.fileId.toString()));
+      await bucket.delete(new ObjectId(image.fileId!.toString()));
 
       await ImageModel.findByIdAndDelete(imageId);
 

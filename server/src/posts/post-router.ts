@@ -252,7 +252,7 @@ const updatePost = async (req: Request, res: Response) => {
 
             if (shouldDeleteImage) {
               const bucket = getImageBucket();
-              await bucket.delete(new ObjectId(oldImage.fileId.toString()));
+              await bucket.delete(new ObjectId(oldImage.fileId!.toString()));
               await ImageModel.findByIdAndDelete(oldImage._id);
             }
           }
@@ -271,7 +271,7 @@ const updatePost = async (req: Request, res: Response) => {
 
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(new ObjectId(oldImage.fileId.toString()));
+          await bucket.delete(new ObjectId(oldImage.fileId!.toString()));
           await ImageModel.findByIdAndDelete(oldImage._id);
         }
       }
@@ -327,7 +327,7 @@ const deletePost = async (req: Request, res: Response) => {
 
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(new ObjectId(image.fileId.toString()));
+          await bucket.delete(new ObjectId(image.fileId!.toString()));
           await ImageModel.findByIdAndDelete(image._id);
         }
       }
