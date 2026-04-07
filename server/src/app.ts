@@ -33,6 +33,19 @@ console.log("COOKIE_SECRET set:", !!process.env.COOKIE_SECRET);
 console.log("===========================");
 
 app.use(express.json());
+
+// Add this middleware to log session cookie being sent
+app.use((req, res, next) => {
+  const originalSetHeader = res.setHeader.bind(res);
+  res.setHeader = function (name: string, value: any) {
+    if (name.toLowerCase() === "set-cookie") {
+      console.log("Setting cookie:", value);
+    }
+    return originalSetHeader(name, value);
+  };
+  next();
+});
+
 app.use(
   cookieSession({
     name: "session",

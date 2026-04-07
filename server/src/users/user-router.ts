@@ -1,8 +1,7 @@
 import argon2 from "argon2";
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
+import { isAdmin, isAuthenticated } from "../middlewares";
 import { UserModel } from "./user-model";
-import express from "express";
-import { isAuthenticated, isAdmin } from "../middlewares";
 
 const userRouter = express.Router();
 
@@ -60,6 +59,9 @@ userRouter.post("/login", async (req, res) => {
     isAdmin: user.isAdmin,
   };
 
+  console.log("Session set after login:", req.session);
+  console.log("Session before response:", JSON.stringify(req.session));
+
   res.status(200).json({
     _id: user._id,
     username: user.username,
@@ -99,7 +101,7 @@ userRouter.get(
     } catch (error) {
       res.status(500).json("Error fetching users");
     }
-  }
+  },
 );
 
 userRouter.put(
@@ -123,7 +125,7 @@ userRouter.put(
       const updatedUser = await UserModel.findByIdAndUpdate(
         req.params.id,
         updateData,
-        { new: true, select: "-password" }
+        { new: true, select: "-password" },
       );
 
       if (!updatedUser) {
@@ -134,7 +136,7 @@ userRouter.put(
     } catch (error) {
       res.status(500).json("Error updating user");
     }
-  }
+  },
 );
 
 userRouter.delete(
@@ -153,7 +155,7 @@ userRouter.delete(
     } catch (error) {
       res.status(500).json("Error deleting user");
     }
-  }
+  },
 );
 
 export default userRouter;
