@@ -10,6 +10,14 @@ require("express-async-errors");
 
 export const app = express();
 
+// Debug logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  console.log("Origin:", req.headers.origin);
+  console.log("Cookie:", req.headers.cookie);
+  next();
+});
+
 // CORS configuration for production deployment
 app.use(
   cors({
@@ -17,6 +25,12 @@ app.use(
     credentials: true, // Important: allows cookies to be sent
   }),
 );
+
+console.log("=== Server Configuration ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("CLIENT_URL:", process.env.CLIENT_URL);
+console.log("COOKIE_SECRET set:", !!process.env.COOKIE_SECRET);
+console.log("===========================");
 
 app.use(express.json());
 app.use(

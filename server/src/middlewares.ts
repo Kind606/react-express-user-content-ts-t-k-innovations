@@ -4,7 +4,7 @@ export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   res.status(500).json({ message: err.message || "Internal server error" });
 };
@@ -12,8 +12,13 @@ export const errorHandler = (
 export const isAuthenticated = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
+  console.log("=== Auth Check ===");
+  console.log("Session exists:", !!req.session);
+  console.log("Session ID:", req.session?.id);
+  console.log("==================");
+
   if (!req.session || !req.session.id) {
     return res.status(401).json("Authentication required");
   }
@@ -23,7 +28,7 @@ export const isAuthenticated = (
 export const isOwnerOrAdmin = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (!req.session || !req.session.id) {
     return res.status(401).json("Authentication required");
@@ -37,7 +42,7 @@ export const isOwnerOrAdmin = async (
 
   try {
     const post = await import("./posts/post-model").then((m) =>
-      m.PostModel.findById(postId)
+      m.PostModel.findById(postId),
     );
 
     if (!post) {
