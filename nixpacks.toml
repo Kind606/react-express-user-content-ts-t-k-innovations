@@ -1,16 +1,16 @@
-[variables]
-NPM_TOKEN = '${NPM_TOKEN}'
-
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+nixPkgs = ["nodejs_20", "bash"]
 
 [phases.install]
-cmds = [
-  "cd server && echo '@plugga-tech:registry=https://npm.pkg.github.com' > .npmrc",
-  "cd server && echo '//npm.pkg.github.com/:_authToken='\"$NPM_TOKEN\" >> .npmrc",
-  "cd server && cat .npmrc",
-  "cd server && npm ci --include=dev"
-]
+cmds = ['''
+cd server
+echo "NPM_TOKEN length: ${#NPM_TOKEN}"
+echo "@plugga-tech:registry=https://npm.pkg.github.com" > .npmrc
+echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc
+echo "Generated .npmrc:"
+cat .npmrc
+npm ci --include=dev
+''']
 
 [phases.build]
 cmds = ["cd server && npm run build"]
