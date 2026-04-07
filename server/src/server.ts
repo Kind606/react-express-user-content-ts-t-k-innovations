@@ -11,7 +11,15 @@ const dbUrl =
 
 async function main() {
   try {
-    await mongoose.connect(dbUrl);
+    // Connection pool optimized for traditional long-running server
+    await mongoose.connect(dbUrl, {
+      maxPoolSize: 50, // Based on expected peak concurrent requests
+      minPoolSize: 10, // Pre-warmed connections ready for traffic spikes
+      maxIdleTimeMS: 300000, // 5 minutes - stable servers benefit from persistent connections
+      connectTimeoutMS: 10000, // 10 seconds - fail fast on connection issues
+      socketTimeoutMS: 30000, // 30 seconds - prevent hanging queries for OLTP operations
+      serverSelectionTimeoutMS: 5000, // 5 seconds - quick failover for replica set topology changes
+    });
     console.log("Connected to MongoDB");
 
     initializeGridFS();

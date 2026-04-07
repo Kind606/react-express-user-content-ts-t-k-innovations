@@ -2,5 +2,10 @@ node_modules
 dist
 .DS_Store
 tests
+
+# Environment variables (all .env files)
 .env
+.env.*
+*.env.local
+
 uploads
