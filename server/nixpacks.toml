@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["chmod +x railway-build.sh && bash railway-build.sh"]
+
+[start]
+cmd = "npm start"

@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["nodejs_20", "bash"]
-
-[phases.install]
-cmds = ["cd server && chmod +x railway-build.sh && bash railway-build.sh"]
-
-[start]
-cmd = "cd server && npm start"
