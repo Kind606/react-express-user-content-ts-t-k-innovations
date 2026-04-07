@@ -1,4 +1,3 @@
-import cookieSession from "cookie-session";
 import cors from "cors";
 import express from "express";
 import { imageRouter } from "./images/image-router";
@@ -49,6 +48,8 @@ app.use((req, res, next) => {
         );
         req.session = JSON.parse(sessionJSON);
         console.log("Session decoded:", req.session);
+        console.log("Session.id immediately after parsing:", req.session.id);
+        console.log("Type of req.session:", typeof req.session);
       } catch (err) {
         console.error("Failed to decode session:", err);
         req.session = null;
@@ -74,7 +75,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Keep cookie-session for now (but we're manually handling it)
+// Cookie-session is no longer needed - we handle sessions manually above
+// Commenting out to prevent conflicts
+/*
 app.use(
   cookieSession({
     name: "session",
@@ -84,6 +87,7 @@ app.use(
     secure: process.env.NODE_ENV === "production", // Use secure cookies in production
   }),
 );
+*/
 
 app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);
