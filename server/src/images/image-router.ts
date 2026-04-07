@@ -127,7 +127,7 @@ imageRouter.get("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    res.set("Content-Type", image.contentType);
+    res.set("Content-Type", image.contentType as string);
     res.set("Cache-Control", "public, max-age=31536000");
     res.set(
       "Content-Disposition",
