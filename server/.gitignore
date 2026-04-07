@@ -8,4 +8,7 @@ tests
 .env.*
 *.env.local
 
+# NPM authentication
+.npmrc
+
 uploads
