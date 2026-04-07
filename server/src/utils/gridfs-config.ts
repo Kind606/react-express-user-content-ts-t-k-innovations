@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
 import { GridFSBucket } from "mongodb";
+import mongoose from "mongoose";
 
 let imageBucket: GridFSBucket;
 
 export function initializeGridFS() {
-  imageBucket = new GridFSBucket(mongoose.connection.db, {
+  imageBucket = new GridFSBucket(mongoose.connection.db as any, {
     bucketName: "images",
     chunkSizeBytes: 1024 * 255,
   });

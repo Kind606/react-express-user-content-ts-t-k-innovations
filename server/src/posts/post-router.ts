@@ -1,12 +1,12 @@
 import { Request, Response, Router } from "express";
-import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
-import { PostModel } from "./post-model";
+import { ObjectId } from "mongodb";
 import { Types } from "mongoose";
 import multer from "multer";
 import { Readable } from "stream";
 import { ImageModel } from "../images/image-model";
+import { isAuthenticated, isOwnerOrAdmin } from "../middlewares";
 import { getImageBucket } from "../utils/gridfs-config";
-import { ObjectId } from "bson";
+import { PostModel } from "./post-model";
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -18,7 +18,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const mimetype = allowedTypes.test(file.mimetype);
     const extname = allowedTypes.test(
-      file.originalname.toLowerCase().split(".").pop() || ""
+      file.originalname.toLowerCase().split(".").pop() || "",
     );
 
     if (mimetype && extname) {
@@ -56,22 +56,22 @@ const getPostById = async (req: Request, res: Response) => {
 };
 
 const uploadImageToGridFS = async (
-  file: Express.Multer.File,
-  userId: string
+  uploadFile: Express.Multer.File,
+  userId: string,
 ): Promise<Types.ObjectId> => {
   const readableStream = new Readable();
-  readableStream.push(file.buffer);
+  readableStream.push(uploadFile.buffer);
   readableStream.push(null);
 
   const bucket = getImageBucket();
-  const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`;
+  const filename = `${Date.now()}-${uploadFile.originalname.replace(/\s+/g, "-")}`;
 
   return new Promise((resolve, reject) => {
     const uploadStream = bucket.openUploadStream(filename, {
-      contentType: file.mimetype,
       metadata: {
         uploadedBy: new Types.ObjectId(userId),
-        originalName: file.originalname,
+        originalName: uploadFile.originalname,
+        contentType: uploadFile.mimetype,
       },
     });
 
@@ -92,9 +92,9 @@ const uploadImageToGridFS = async (
         try {
           const image = new ImageModel({
             filename: file.filename,
-            contentType: file.contentType,
+            contentType: uploadFile.mimetype,
             size: file.length,
-            fileId: file._id,
+            fileId: new Types.ObjectId(file._id),
             metadata: {
               uploadedBy: new Types.ObjectId(userId),
               originalName: file.filename,
@@ -108,7 +108,7 @@ const uploadImageToGridFS = async (
           bucket.delete(new ObjectId(file._id.toString())).catch(console.error);
           reject(err);
         }
-      }
+      },
     );
   });
 };
@@ -166,7 +166,7 @@ const createPost = async (req: Request, res: Response) => {
 const updatePost = async (req: Request, res: Response) => {
   try {
     const isFormData = req.headers["content-type"]?.includes(
-      "multipart/form-data"
+      "multipart/form-data",
     );
     const { title, content } = req.body;
     const postId = req.params.id;
@@ -247,7 +247,7 @@ const updatePost = async (req: Request, res: Response) => {
           const oldImage = await ImageModel.findById(post.image);
           if (oldImage) {
             const shouldDeleteImage = await oldImage.removePostReference(
-              post._id
+              post._id,
             );
 
             if (shouldDeleteImage) {

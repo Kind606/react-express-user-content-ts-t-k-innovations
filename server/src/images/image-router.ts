@@ -1,11 +1,11 @@
-import { Router, Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import { ObjectId } from "mongodb";
 import { Types } from "mongoose";
 import multer from "multer";
 import { Readable } from "stream";
+import { isAdmin, isAuthenticated } from "../middlewares";
 import { getImageBucket } from "../utils/gridfs-config";
 import { ImageModel } from "./image-model";
-import { isAuthenticated, isAdmin } from "../middlewares";
-import { ObjectId } from "bson";
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -17,7 +17,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const mimetype = allowedTypes.test(file.mimetype);
     const extname = allowedTypes.test(
-      file.originalname.toLowerCase().split(".").pop() || ""
+      file.originalname.toLowerCase().split(".").pop() || "",
     );
 
     if (mimetype && extname) {
@@ -48,7 +48,7 @@ imageRouter.post(
 
       const filename = `${Date.now()}-${req.file.originalname.replace(
         /\s+/g,
-        "-"
+        "-",
       )}`;
 
       const readableStream = new Readable();
@@ -56,10 +56,10 @@ imageRouter.post(
       readableStream.push(null);
 
       const uploadStream = bucket.openUploadStream(filename, {
-        contentType: req.file.mimetype,
         metadata: {
           uploadedBy: userId,
           originalName: req.file.originalname,
+          contentType: req.file.mimetype,
         },
       });
 
@@ -81,9 +81,9 @@ imageRouter.post(
             try {
               const image = new ImageModel({
                 filename: file.filename,
-                contentType: file.contentType,
+                contentType: req.file.mimetype,
                 size: file.length,
-                fileId: file._id,
+                fileId: new Types.ObjectId(file._id),
                 metadata: {
                   uploadedBy: userId,
                   originalName: req.file?.originalname,
@@ -101,7 +101,7 @@ imageRouter.post(
             } catch (err) {
               reject(err);
             }
-          }
+          },
         );
       });
     } catch (error) {
@@ -111,7 +111,7 @@ imageRouter.post(
           error instanceof Error ? error.message : "Failed to upload image",
       });
     }
-  }
+  },
 );
 
 imageRouter.get("/:id", async (req: Request, res: Response) => {
@@ -131,12 +131,12 @@ imageRouter.get("/:id", async (req: Request, res: Response) => {
     res.set("Cache-Control", "public, max-age=31536000");
     res.set(
       "Content-Disposition",
-      `inline; filename="${image.metadata?.originalName || image.filename}"`
+      `inline; filename="${image.metadata?.originalName || image.filename}"`,
     );
 
     const bucket = getImageBucket();
     const downloadStream = bucket.openDownloadStream(
-      new ObjectId(image.fileId.toString())
+      new ObjectId(image.fileId.toString()),
     );
 
     downloadStream.on("error", (error) => {
@@ -234,7 +234,7 @@ imageRouter.delete(
           error instanceof Error ? error.message : "Failed to delete image",
       });
     }
-  }
+  },
 );
 
 imageRouter.get(
@@ -270,5 +270,5 @@ imageRouter.get(
         error: "Failed to retrieve images",
       });
     }
-  }
+  },
 );
