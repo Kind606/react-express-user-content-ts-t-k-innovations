@@ -34,7 +34,35 @@ console.log("===========================");
 
 app.use(express.json());
 
-// Add this middleware to log session cookie being sent
+// Manual session parsing middleware (replaces cookie-session)
+app.use((req, res, next) => {
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    const sessionCookie = cookies
+      .split(";")
+      .find((c) => c.trim().startsWith("session="));
+    if (sessionCookie) {
+      try {
+        const sessionValue = sessionCookie.split("=")[1];
+        const sessionJSON = Buffer.from(sessionValue, "base64").toString(
+          "utf-8",
+        );
+        req.session = JSON.parse(sessionJSON);
+        console.log("Session decoded:", req.session);
+      } catch (err) {
+        console.error("Failed to decode session:", err);
+        req.session = null;
+      }
+    } else {
+      req.session = null;
+    }
+  } else {
+    req.session = null;
+  }
+  next();
+});
+
+// Add this middleware to log session cookie being sent (keep for debugging)
 app.use((req, res, next) => {
   const originalSetHeader = res.setHeader.bind(res);
   res.setHeader = function (name: string, value: any) {
@@ -46,6 +74,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Keep cookie-session for now (but we're manually handling it)
 app.use(
   cookieSession({
     name: "session",

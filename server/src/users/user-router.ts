@@ -22,11 +22,21 @@ userRouter.post("/register", async (req: Request, res: Response) => {
   try {
     await user.save();
 
-    req.session = {
+    // Create session data
+    const sessionData = {
       id: user._id.toString(),
       username: user.username,
       isAdmin: user.isAdmin,
     };
+
+    req.session = sessionData;
+
+    // Manually set the session cookie
+    const sessionJSON = JSON.stringify(sessionData);
+    const sessionEncoded = Buffer.from(sessionJSON).toString("base64");
+    const cookieValue = `session=${sessionEncoded}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=86400`;
+
+    res.setHeader("Set-Cookie", cookieValue);
 
     res.status(201).json({
       _id: user._id,
@@ -53,21 +63,22 @@ userRouter.post("/login", async (req, res) => {
     return res.status(401).json("Invalid username or password");
   }
 
-  req.session = {
+  // Create session data
+  const sessionData = {
     id: user._id.toString(),
     username: user.username,
     isAdmin: user.isAdmin,
   };
 
-  console.log("Session set after login:", req.session);
-  console.log("Session before response:", JSON.stringify(req.session));
+  req.session = sessionData;
 
-  // Test if ANY cookie can be set through Railway
-  res.setHeader("Set-Cookie", [
-    "test-cookie=hello; Path=/; Secure; SameSite=None; Max-Age=3600",
-    "another-test=world; Path=/; Secure; SameSite=None; Max-Age=3600",
-  ]);
-  console.log("Test cookies set manually");
+  // Manually set the session cookie
+  const sessionJSON = JSON.stringify(sessionData);
+  const sessionEncoded = Buffer.from(sessionJSON).toString("base64");
+  const cookieValue = `session=${sessionEncoded}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=86400`;
+
+  res.setHeader("Set-Cookie", cookieValue);
+  console.log("Session cookie set for user:", user.username);
 
   res.status(200).json({
     _id: user._id,
@@ -94,6 +105,11 @@ userRouter.get("/current", async (req, res) => {
 
 userRouter.post("/logout", (req, res) => {
   req.session = null;
+  // Clear the session cookie
+  res.setHeader(
+    "Set-Cookie",
+    "session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0",
+  );
   res.sendStatus(204);
 });
 
