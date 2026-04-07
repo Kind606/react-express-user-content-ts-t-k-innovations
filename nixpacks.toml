@@ -3,13 +3,8 @@ nixPkgs = ["nodejs_20"]
 
 [phases.install]
 cmds = [
-  "cd server && echo '@plugga-tech:registry=https://npm.pkg.github.com' > .npmrc",
-  "cd server && echo '//npm.pkg.github.com/:_authToken=${NPM_TOKEN}' >> .npmrc",
-  "cd server && npm ci --include=dev"
+  "cd server && chmod +x build.sh && ./build.sh"
 ]
-
-[phases.build]
-cmds = ["cd server && npm run build"]
 
 [start]
 cmd = "cd server && npm start"
