@@ -5,7 +5,7 @@
   "description": "En självrättande inlämningsuppgift.",
   "homepage": "https://plugga.tech",
   "scripts": {
-    "postinstall": "plugga init",
+    "postinstall": "echo 'Skipping plugga init in production'",
     "start": "node dist/server.js",
     "build": "tsc",
     "check": "tsc --noEmit",
@@ -13,7 +13,6 @@
     "test": "plugga test --vitest --ts"
   },
   "dependencies": {
-    "@plugga-tech/react-express-user-content-ts-server": "^1.0.5",
     "@types/multer": "^1.4.12",
     "argon2": "^0.43.0",
     "cookie-session": "^2.1.0",

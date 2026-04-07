@@ -1,3 +1,0 @@
-# This file will be created dynamically during Railway build
-# The actual token is injected via NPM_TOKEN environment variable
-@plugga-tech:registry=https://npm.pkg.github.com
