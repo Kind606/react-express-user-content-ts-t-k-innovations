@@ -13,7 +13,8 @@ export const uploadImage = async (
 };
 
 export const getImageUrl = (imageId: string): string => {
-  return `/api/images/${imageId}`;
+  const baseUrl = import.meta.env.VITE_API_URL || "/api";
+  return `${baseUrl}/images/${imageId}`;
 };
 
 export const getImageMetadata = async (
