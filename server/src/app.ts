@@ -48,7 +48,7 @@ app.use((req, res, next) => {
         );
         req.session = JSON.parse(sessionJSON);
         console.log("Session decoded:", req.session);
-        console.log("Session.id immediately after parsing:", req.session.id);
+        console.log("Session.id immediately after parsing:", req.session?.id);
         console.log("Type of req.session:", typeof req.session);
       } catch (err) {
         console.error("Failed to decode session:", err);
