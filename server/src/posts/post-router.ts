@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import { ObjectId } from "mongodb";
 import { Types } from "mongoose";
 import multer from "multer";
 import { Readable } from "stream";
@@ -69,7 +68,7 @@ const uploadImageToGridFS = async (
   return new Promise((resolve, reject) => {
     const uploadStream = bucket.openUploadStream(filename, {
       metadata: {
-        uploadedBy: new Types.ObjectId(userId),
+        uploadedBy: userId,
         originalName: uploadFile.originalname,
         contentType: uploadFile.mimetype,
       },
@@ -81,35 +80,30 @@ const uploadImageToGridFS = async (
       reject(error);
     });
 
-    uploadStream.on(
-      "finish",
-      async (file: {
-        filename: any;
-        contentType: any;
-        length: any;
-        _id: ObjectId;
-      }) => {
-        try {
-          const image = new ImageModel({
-            filename: file.filename,
-            contentType: uploadFile.mimetype,
-            size: file.length,
-            fileId: new Types.ObjectId(file._id),
-            metadata: {
-              uploadedBy: new Types.ObjectId(userId),
-              originalName: file.filename,
-            },
-            posts: [],
-          });
+    uploadStream.on("finish", async () => {
+      try {
+        const image = new ImageModel({
+          filename: uploadStream.filename,
+          contentType: uploadFile.mimetype,
+          size: uploadStream.length,
+          fileId: uploadStream.id,
+          metadata: {
+            uploadedBy: new Types.ObjectId(userId),
+            originalName: uploadFile.originalname,
+          },
+          posts: [],
+        });
 
-          await image.save();
-          resolve(image._id);
-        } catch (err) {
-          bucket.delete(new ObjectId(file._id.toString())).catch(console.error);
-          reject(err);
-        }
-      },
-    );
+        await image.save();
+        console.log("Image uploaded successfully, ID:", image._id);
+        resolve(image._id);
+      } catch (err) {
+        console.error("Error saving image model:", err);
+        // Delete the GridFS file if model save fails
+        bucket.delete(uploadStream.id as any).catch(console.error);
+        reject(err);
+      }
+    });
   });
 };
 
@@ -130,9 +124,15 @@ const createPost = async (req: Request, res: Response) => {
 
     if (req.file) {
       try {
+        console.log("Uploading image to GridFS:", req.file.originalname);
         imageId = await uploadImageToGridFS(req.file, userId);
+        console.log("Image uploaded successfully, ID:", imageId);
       } catch (error) {
-        return res.status(500).json("Error uploading image");
+        console.error("Error uploading image to GridFS:", error);
+        return res.status(500).json({
+          error: "Error uploading image",
+          details: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
@@ -144,11 +144,13 @@ const createPost = async (req: Request, res: Response) => {
     });
 
     await post.save();
+    console.log("Post saved:", post._id);
 
     if (imageId) {
       await ImageModel.findByIdAndUpdate(imageId, {
         $push: { posts: post._id },
       });
+      console.log("Image updated with post reference");
     }
 
     const postObject = post.toObject();
@@ -159,7 +161,11 @@ const createPost = async (req: Request, res: Response) => {
 
     res.status(201).json(postObject);
   } catch (error) {
-    res.status(500).json("Error creating post");
+    console.error("Error creating post:", error);
+    res.status(500).json({
+      error: "Error creating post",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 };
 
@@ -252,7 +258,7 @@ const updatePost = async (req: Request, res: Response) => {
 
             if (shouldDeleteImage) {
               const bucket = getImageBucket();
-              await bucket.delete(new ObjectId(oldImage.fileId!.toString()));
+              await bucket.delete(oldImage.fileId! as any);
               await ImageModel.findByIdAndDelete(oldImage._id);
             }
           }
@@ -271,7 +277,7 @@ const updatePost = async (req: Request, res: Response) => {
 
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(new ObjectId(oldImage.fileId!.toString()));
+          await bucket.delete(oldImage.fileId! as any);
           await ImageModel.findByIdAndDelete(oldImage._id);
         }
       }
@@ -327,7 +333,7 @@ const deletePost = async (req: Request, res: Response) => {
 
         if (shouldDeleteImage) {
           const bucket = getImageBucket();
-          await bucket.delete(new ObjectId(image.fileId!.toString()));
+          await bucket.delete(image.fileId! as any);
           await ImageModel.findByIdAndDelete(image._id);
         }
       }

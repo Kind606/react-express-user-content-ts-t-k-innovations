@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import { ObjectId } from "mongodb";
 import { Types } from "mongoose";
 import multer from "multer";
 import { Readable } from "stream";
@@ -70,39 +69,32 @@ imageRouter.post(
           reject(error);
         });
 
-        uploadStream.on(
-          "finish",
-          async (file: {
-            filename: any;
-            contentType: any;
-            length: any;
-            _id: ObjectId;
-          }) => {
-            try {
-              const image = new ImageModel({
-                filename: file.filename,
-                contentType: req.file!.mimetype,
-                size: file.length,
-                fileId: new Types.ObjectId(file._id),
-                metadata: {
-                  uploadedBy: userId,
-                  originalName: req.file!.originalname,
-                },
-                posts: [],
-              });
+        uploadStream.on("finish", async () => {
+          try {
+            const image = new ImageModel({
+              filename: uploadStream.filename,
+              contentType: req.file!.mimetype,
+              size: uploadStream.length,
+              fileId: uploadStream.id,
+              metadata: {
+                uploadedBy: userId,
+                originalName: req.file!.originalname,
+              },
+              posts: [],
+            });
 
-              await image.save();
+            await image.save();
 
-              res.status(201).json({
-                success: true,
-                image: image.toObject(),
-              });
-              resolve();
-            } catch (err) {
-              reject(err);
-            }
-          },
-        );
+            res.status(201).json({
+              success: true,
+              image: image.toObject(),
+            });
+            resolve();
+          } catch (err) {
+            bucket.delete(uploadStream.id as any).catch(console.error);
+            reject(err);
+          }
+        });
       });
     } catch (error) {
       res.status(500).json({
@@ -135,9 +127,7 @@ imageRouter.get("/:id", async (req: Request, res: Response) => {
     );
 
     const bucket = getImageBucket();
-    const downloadStream = bucket.openDownloadStream(
-      new ObjectId(image.fileId!.toString()),
-    );
+    const downloadStream = bucket.openDownloadStream(image.fileId! as any);
 
     downloadStream.on("error", (error) => {
       if (!res.headersSent) {
@@ -219,7 +209,7 @@ imageRouter.delete(
       }
 
       const bucket = getImageBucket();
-      await bucket.delete(new ObjectId(image.fileId!.toString()));
+      await bucket.delete(image.fileId! as any);
 
       await ImageModel.findByIdAndDelete(imageId);
 

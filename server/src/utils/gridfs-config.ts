@@ -1,17 +1,27 @@
-import { GridFSBucket } from "mongodb";
 import mongoose from "mongoose";
 
-let imageBucket: GridFSBucket;
+let imageBucket: mongoose.mongo.GridFSBucket;
 
 export function initializeGridFS() {
-  imageBucket = new GridFSBucket(mongoose.connection.db as any, {
+  if (!mongoose.connection.db) {
+    throw new Error(
+      "MongoDB connection not established. Call this after connecting to MongoDB.",
+    );
+  }
+
+  imageBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
     bucketName: "images",
     chunkSizeBytes: 1024 * 255,
   });
 
+  console.log("GridFS initialized successfully");
   return imageBucket;
 }
 
-export function getImageBucket(): GridFSBucket {
-  return imageBucket ?? initializeGridFS();
+export function getImageBucket(): mongoose.mongo.GridFSBucket {
+  if (!imageBucket) {
+    console.log("GridFS bucket not initialized, initializing now...");
+    return initializeGridFS();
+  }
+  return imageBucket;
 }

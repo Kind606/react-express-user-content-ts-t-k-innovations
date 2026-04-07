@@ -23,8 +23,26 @@ const CreatePostPage = () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       navigate(`/posts/${data._id}`);
     },
-    onError: (error: Error) => {
-      setError(error.message || "Failed to create post. Please try again.");
+    onError: (error: any) => {
+      console.error("Create post error:", error);
+      console.error("Error response:", error.response?.data);
+
+      let errorMessage = "Failed to create post. Please try again.";
+
+      if (error.response?.data) {
+        if (typeof error.response.data === "string") {
+          errorMessage = error.response.data;
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+          if (error.response.data.details) {
+            errorMessage += `: ${error.response.data.details}`;
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
     },
   });
 
@@ -75,11 +93,18 @@ const CreatePostPage = () => {
         margin: "50px auto",
         padding: 3,
         backgroundColor: "#f9f9f9",
-    
       }}
     >
-      <Typography variant="h4" component="h1" gutterBottom
-        sx={{ color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2  }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{
+          color: "#8f7474",
+          borderBottom: "2px solid #8f7474",
+          paddingBottom: 2,
+        }}
+      >
         Create New Post
       </Typography>
 
