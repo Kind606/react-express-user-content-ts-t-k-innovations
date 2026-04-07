@@ -8,9 +8,9 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { PostCard } from "../components/posts/PostCard";
+import TkInvoLogo from "../images/TkInvo.png";
 import { getAllPosts } from "../services/postService";
 import { Post } from "../types/Post";
-import TkInvoLogo from "../images/tkinvo.png";
 
 const PostsPage = () => {
   const {
@@ -46,8 +46,8 @@ const PostsPage = () => {
 
   return (
     <>
-      <Box sx={{ textAlign: "center", backgroundColor: "#bab7b7"}}>
-      <img
+      <Box sx={{ textAlign: "center", backgroundColor: "#bab7b7" }}>
+        <img
           src={TkInvoLogo}
           alt="TkInvo Logo"
           style={{
@@ -58,13 +58,18 @@ const PostsPage = () => {
         />
       </Box>
       <Container sx={{ marginTop: 4 }}>
-          <Box sx={ {color: "#8f7474", borderBottom: "2px solid #8f7474", paddingBottom: 2}}>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Posts
-            </Typography>
-          </Box>
+        <Box
+          sx={{
+            color: "#8f7474",
+            borderBottom: "2px solid #8f7474",
+            paddingBottom: 2,
+          }}
+        >
+          <Typography variant="h4" component="h1" gutterBottom>
+            Posts
+          </Typography>
+        </Box>
 
-          
         {posts && posts.length > 0 ? (
           <Grid container spacing={3}>
             {posts.map((post: Post) => (
