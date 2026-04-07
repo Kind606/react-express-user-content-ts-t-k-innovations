@@ -1,8 +1,8 @@
-import api from "./api";
 import { ImageResponse } from "../types/Image";
+import api from "./api";
 
 export const uploadImage = async (
-  formData: FormData
+  formData: FormData,
 ): Promise<ImageResponse> => {
   const response = await api.post("/images", formData, {
     headers: {
@@ -18,7 +18,7 @@ export const getImageUrl = (imageId: string): string => {
 };
 
 export const getImageMetadata = async (
-  imageId: string
+  imageId: string,
 ): Promise<ImageResponse> => {
   const response = await api.get(`/images/metadata/${imageId}`);
   return response.data.image;
