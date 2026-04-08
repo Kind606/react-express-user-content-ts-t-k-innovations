@@ -77,6 +77,24 @@ userRouter.post("/login", async (req, res) => {
   const sessionEncoded = Buffer.from(sessionJSON).toString("base64");
   const cookieValue = `session=${sessionEncoded}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=86400`;
 
+  console.log("Setting cookie with attributes:", {
+    Secure: true,
+    SameSite: "None",
+    HttpOnly: true,
+    MaxAge: 86400,
+  });
+  console.log("Request origin:", req.headers.origin);
+  console.log("Request protocol:", req.protocol);
+
+  console.log("Setting cookie with attributes:", {
+    Secure: true,
+    SameSite: "None",
+    HttpOnly: true,
+    MaxAge: 86400,
+  });
+  console.log("Request origin:", req.headers.origin);
+  console.log("Request protocol:", req.protocol);
+
   res.setHeader("Set-Cookie", cookieValue);
   console.log("Session cookie set for user:", user.username);
 

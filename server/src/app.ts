@@ -9,6 +9,9 @@ require("express-async-errors");
 
 export const app = express();
 
+// Trust Railway's proxy (important for detecting HTTPS correctly on Railway)
+app.set("trust proxy", 1);
+
 // Debug logging
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
