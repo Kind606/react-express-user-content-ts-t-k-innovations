@@ -347,6 +347,66 @@ const deletePost = async (req: Request, res: Response) => {
   }
 };
 
+const favoritePost = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.session!.id;
+
+    const post = await PostModel.findById(postId);
+
+    if (!post) {
+      return res.status(404).json(`Post with id ${postId} not found`);
+    }
+
+    // Check if user already favorited
+    if (
+      post.favorites &&
+      post.favorites.some((fav) => fav.toString() === userId)
+    ) {
+      return res.status(400).json("Post already favorited");
+    }
+
+    // Add user to favorites
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      { $addToSet: { favorites: new Types.ObjectId(userId) } },
+      { new: true },
+    )
+      .populate("author", "username")
+      .populate("image");
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res.status(500).json("Error favoriting post");
+  }
+};
+
+const unfavoritePost = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.session!.id;
+
+    const post = await PostModel.findById(postId);
+
+    if (!post) {
+      return res.status(404).json(`Post with id ${postId} not found`);
+    }
+
+    // Remove user from favorites
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      { $pull: { favorites: new Types.ObjectId(userId) } },
+      { new: true },
+    )
+      .populate("author", "username")
+      .populate("image");
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res.status(500).json("Error unfavoriting post");
+  }
+};
+
 export const postRouter = Router();
 
 postRouter.get("/", getAllPosts);
@@ -355,3 +415,6 @@ postRouter.get("/:id", getPostById);
 postRouter.post("/", isAuthenticated, upload.single("image"), createPost);
 postRouter.put("/:id", isOwnerOrAdmin, upload.single("image"), updatePost);
 postRouter.delete("/:id", isOwnerOrAdmin, deletePost);
+
+postRouter.post("/:id/favorite", isAuthenticated, favoritePost);
+postRouter.delete("/:id/favorite", isAuthenticated, unfavoritePost);

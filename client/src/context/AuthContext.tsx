@@ -68,6 +68,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         localStorage.setItem("sessionToken", response.data.token);
       }
 
+      sessionStorage.setItem("showWelcome", "true");
+
       setUser(response.data);
     } catch (err) {
       if (err instanceof Error) {

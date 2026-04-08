@@ -1,5 +1,5 @@
-import api from "./api";
 import { Post } from "../types/Post";
+import api from "./api";
 
 export const getAllPosts = async (): Promise<Post[]> => {
   const response = await api.get("/posts");
@@ -32,4 +32,14 @@ export const updatePost = async (formData: FormData): Promise<Post> => {
 
 export const deletePost = async (id: string): Promise<void> => {
   await api.delete(`/posts/${id}`);
+};
+
+export const favoritePost = async (id: string): Promise<Post> => {
+  const response = await api.post(`/posts/${id}/favorite`);
+  return response.data;
+};
+
+export const unfavoritePost = async (id: string): Promise<Post> => {
+  const response = await api.delete(`/posts/${id}/favorite`);
+  return response.data;
 };

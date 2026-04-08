@@ -1,4 +1,5 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ShareIcon from "@mui/icons-material/Share";
 import {
@@ -14,9 +15,11 @@ import {
   Typography,
 } from "@mui/material";
 import { red } from "@mui/material/colors";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import { getImageUrl } from "../../services/imageService";
-import { ImageResponse } from "../../types/Image";
+import { favoritePost, unfavoritePost } from "../../services/postService";
 import { Post } from "../../types/Post";
 
 interface PostCardProps {
@@ -24,20 +27,26 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post }: PostCardProps) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { mutate: toggleFavorite, isPending } = useMutation({
+    mutationFn: (isFavorited: boolean) =>
+      isFavorited ? unfavoritePost(post._id) : favoritePost(post._id),
+    onSuccess: (updatedPost) => {
+      queryClient.setQueryData<Post[]>(["posts"], (old) =>
+        old?.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
+      );
+    },
+  });
+
   const authorName =
     typeof post.author === "string" ? post.author : post.author?.username;
-
-  const getImageSrc = () => {
-    if (!post.image) return null;
-
-    if (typeof post.image === "string") {
-      return getImageUrl(post.image);
-    } else {
-      return getImageUrl((post.image as ImageResponse)._id);
-    }
-  };
-
-  const imageUrl = getImageSrc();
+  const imageUrl = post.image
+    ? getImageUrl(typeof post.image === "string" ? post.image : post.image._id)
+    : null;
+  const isFavorited = user && post.favorites?.includes(user._id);
+  const favoritesCount = post.favorites?.length || 0;
 
   return (
     <Card
@@ -59,7 +68,6 @@ export const PostCard = ({ post }: PostCardProps) => {
             <MoreVertIcon />
           </IconButton>
         }
-       
         subheader={`By: ${authorName}`}
       />
       {imageUrl && (
@@ -74,26 +82,36 @@ export const PostCard = ({ post }: PostCardProps) => {
         />
       )}
       <CardContent>
-        {/* Add the post title */}
         <Typography
           variant="h6"
           component="h2"
-          sx={{
-            fontWeight: "bold",
-            marginBottom: 1,
-          }}
+          sx={{ fontWeight: "bold", mb: 1 }}
         >
           {post.title}
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        <Typography variant="body2" color="text.secondary">
           {post.content.length > 100
             ? `${post.content.substring(0, 100)}...`
             : post.content}
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+        <IconButton
+          aria-label="add to favorites"
+          onClick={() => user && toggleFavorite(!!isFavorited)}
+          disabled={!user || isPending}
+          sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+        >
+          {isFavorited ? (
+            <FavoriteIcon sx={{ color: red[500] }} />
+          ) : (
+            <FavoriteBorderIcon />
+          )}
+          {favoritesCount > 0 && (
+            <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+              {favoritesCount}
+            </Typography>
+          )}
         </IconButton>
         <IconButton aria-label="share">
           <ShareIcon />

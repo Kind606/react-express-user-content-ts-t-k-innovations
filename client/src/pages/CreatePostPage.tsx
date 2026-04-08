@@ -23,7 +23,7 @@ const CreatePostPage = () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       navigate(`/posts/${data._id}`);
     },
-    onError: (error: any) => {
+    onError: (error: anyn) => {
       console.error("Create post error:", error);
       console.error("Error response:", error.response?.data);
 
@@ -153,6 +153,9 @@ const CreatePostPage = () => {
                 border: "1px solid #ddd",
                 padding: 2,
                 borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
               <img

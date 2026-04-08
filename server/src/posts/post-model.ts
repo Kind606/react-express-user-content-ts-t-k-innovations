@@ -6,8 +6,9 @@ const postSchema = new Schema(
     content: { type: String, required: true },
     author: { type: Types.ObjectId, ref: "User", required: true },
     image: { type: Types.ObjectId, ref: "Image" },
+    favorites: [{ type: Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const PostModel = model("Post", postSchema);

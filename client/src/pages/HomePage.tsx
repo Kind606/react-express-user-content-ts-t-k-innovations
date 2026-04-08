@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import PostPage from "./PostsPage";
-import { useAuth } from "../hooks/useAuth";
-import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import PostPage from "./PostsPage";
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const handleClose = (
     _event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") return;
     setOpen(false);
@@ -21,7 +21,11 @@ const HomePage: React.FC = () => {
     : "Welcome Guest";
 
   useEffect(() => {
-    setOpen(true);
+    const shouldShowWelcome = sessionStorage.getItem("showWelcome");
+    if (shouldShowWelcome === "true") {
+      setOpen(true);
+      sessionStorage.removeItem("showWelcome");
+    }
   }, []);
 
   return (
