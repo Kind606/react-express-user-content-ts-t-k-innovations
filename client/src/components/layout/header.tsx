@@ -1,3 +1,4 @@
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
   Box,
@@ -13,7 +14,6 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import MenuIcon from "@mui/icons-material/Menu"; 
 import { useAuth } from "../../hooks/useAuth";
 
 const Header = () => {
@@ -45,6 +45,16 @@ const Header = () => {
               Admin
             </Button>
           )}
+          <Typography
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              ml: 2,
+              fontWeight: "bold",
+            }}
+          >
+            {user.username}
+          </Typography>
           <Button onClick={handleLogout} color="inherit">
             Logout
           </Button>
@@ -72,7 +82,6 @@ const Header = () => {
           alignItems: "center",
         }}
       >
-       
         <Typography
           variant="h6"
           component={Link}
@@ -126,6 +135,12 @@ const Header = () => {
                           <ListItemText primary="Admin" />
                         </ListItem>
                       )}
+                      <ListItem>
+                        <ListItemText
+                          primary={`User: ${user.username}`}
+                          primaryTypographyProps={{ fontWeight: "bold" }}
+                        />
+                      </ListItem>
                       <ListItem onClick={handleLogout}>
                         <ListItemText primary="Logout" />
                       </ListItem>
