@@ -23,23 +23,30 @@ const CreatePostPage = () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       navigate(`/posts/${data._id}`);
     },
-    onError: (error: anyn) => {
+    onError: (error: unknown) => {
       console.error("Create post error:", error);
-      console.error("Error response:", error.response?.data);
-
+      
       let errorMessage = "Failed to create post. Please try again.";
 
-      if (error.response?.data) {
-        if (typeof error.response.data === "string") {
-          errorMessage = error.response.data;
-        } else if (error.response.data.error) {
-          errorMessage = error.response.data.error;
-          if (error.response.data.details) {
-            errorMessage += `: ${error.response.data.details}`;
+      if (error && typeof error === "object") {
+        const err = error as { response?: { data?: unknown }; message?: string };
+        console.error("Error response:", err.response?.data);
+
+        if (err.response?.data) {
+          if (typeof err.response.data === "string") {
+            errorMessage = err.response.data;
+          } else if (typeof err.response.data === "object" && err.response.data !== null) {
+            const errorData = err.response.data as { error?: string; details?: string };
+            if (errorData.error) {
+              errorMessage = errorData.error;
+              if (errorData.details) {
+                errorMessage += `: ${errorData.details}`;
+              }
+            }
           }
+        } else if (err.message) {
+          errorMessage = err.message;
         }
-      } else if (error.message) {
-        errorMessage = error.message;
       }
 
       setError(errorMessage);
