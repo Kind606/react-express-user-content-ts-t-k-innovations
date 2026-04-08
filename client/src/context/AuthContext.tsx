@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import api from "../services/api";
 import { User } from "../types/User";
 
@@ -34,9 +34,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await api.get("/users/current");
-        setUser(response.data);
+        // Check if we have a token in localStorage (for mobile browsers)
+        const token = localStorage.getItem("sessionToken");
+        if (token) {
+          // Token exists, verify it's still valid
+          const response = await api.get("/users/current");
+          setUser(response.data);
+        } else {
+          // No token, try cookie-based auth (for desktop browsers)
+          const response = await api.get("/users/current");
+          setUser(response.data);
+        }
       } catch {
+        // Clear invalid token
+        localStorage.removeItem("sessionToken");
         setUser(null);
       } finally {
         setLoading(false);
@@ -51,6 +62,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(true);
       setError(null);
       const response = await api.post("/users/login", { username, password });
+
+      // Store token in localStorage if provided (for mobile browsers)
+      if (response.data.token) {
+        localStorage.setItem("sessionToken", response.data.token);
+      }
+
       setUser(response.data);
     } catch (err) {
       if (err instanceof Error) {
@@ -76,6 +93,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         username,
         password,
       });
+
+      // Store token in localStorage if provided (for mobile browsers)
+      if (response.data.token) {
+        localStorage.setItem("sessionToken", response.data.token);
+      }
+
       setUser(response.data);
     } catch (err) {
       if (err instanceof Error) {
@@ -97,6 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setLoading(true);
       await api.post("/users/logout");
+      localStorage.removeItem("sessionToken"); // Clear token
       setUser(null);
     } catch (err) {
       console.error("Logout error:", err);

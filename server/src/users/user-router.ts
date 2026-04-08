@@ -38,10 +38,12 @@ userRouter.post("/register", async (req: Request, res: Response) => {
 
     res.setHeader("Set-Cookie", cookieValue);
 
+    // ALSO return the token in response body (for iOS Safari/mobile)
     res.status(201).json({
       _id: user._id,
       username: user.username,
       isAdmin: user.isAdmin,
+      token: sessionEncoded, // Add this for mobile browsers
     });
   } catch (err) {
     res.status(500).json("Internal server error");
@@ -86,22 +88,15 @@ userRouter.post("/login", async (req, res) => {
   console.log("Request origin:", req.headers.origin);
   console.log("Request protocol:", req.protocol);
 
-  console.log("Setting cookie with attributes:", {
-    Secure: true,
-    SameSite: "None",
-    HttpOnly: true,
-    MaxAge: 86400,
-  });
-  console.log("Request origin:", req.headers.origin);
-  console.log("Request protocol:", req.protocol);
-
   res.setHeader("Set-Cookie", cookieValue);
   console.log("Session cookie set for user:", user.username);
 
+  // ALSO return the token in response body (for iOS Safari/mobile)
   res.status(200).json({
     _id: user._id,
     username: user.username,
     isAdmin: user.isAdmin,
+    token: sessionEncoded, // Add this for mobile browsers
   });
 });
 

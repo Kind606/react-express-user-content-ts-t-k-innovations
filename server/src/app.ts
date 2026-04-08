@@ -38,6 +38,7 @@ app.use(express.json());
 
 // Manual session parsing middleware (replaces cookie-session)
 app.use((req, res, next) => {
+  // First, try to get session from cookie (for desktop browsers)
   const cookies = req.headers.cookie;
   if (cookies) {
     const sessionCookie = cookies
@@ -50,19 +51,33 @@ app.use((req, res, next) => {
           "utf-8",
         );
         req.session = JSON.parse(sessionJSON);
-        console.log("Session decoded:", req.session);
+        console.log("Session decoded from cookie:", req.session);
         console.log("Session.id immediately after parsing:", req.session?.id);
-        console.log("Type of req.session:", typeof req.session);
+        next();
+        return;
       } catch (err) {
-        console.error("Failed to decode session:", err);
-        req.session = null;
+        console.error("Failed to decode session from cookie:", err);
       }
-    } else {
-      req.session = null;
     }
-  } else {
-    req.session = null;
   }
+
+  // Fallback: check Authorization header (for iOS Safari/mobile)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.substring(7); // Remove "Bearer " prefix
+      const sessionJSON = Buffer.from(token, "base64").toString("utf-8");
+      req.session = JSON.parse(sessionJSON);
+      console.log("Session decoded from Authorization header:", req.session);
+      next();
+      return;
+    } catch (err) {
+      console.error("Failed to decode session from Authorization header:", err);
+    }
+  }
+
+  // No valid session found
+  req.session = null;
   next();
 });
 

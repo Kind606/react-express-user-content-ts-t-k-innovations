@@ -8,4 +8,13 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Add interceptor to include Authorization header from localStorage
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("sessionToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default api;
