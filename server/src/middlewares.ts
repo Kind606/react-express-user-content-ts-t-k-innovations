@@ -49,7 +49,12 @@ export const isOwnerOrAdmin = async (
       return res.status(404).json(`Post with id ${postId} not found`);
     }
 
-    if (post.author.toString() === req.session.id || req.session.isAdmin) {
+    const authorId = post.author?.toString();
+    if (!authorId) {
+      return res.status(403).json("Post author not found");
+    }
+
+    if (authorId === req.session.id || req.session.isAdmin) {
       return next();
     }
 
